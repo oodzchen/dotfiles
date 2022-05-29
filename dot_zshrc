@@ -115,5 +115,6 @@ export NVM_DIR="$HOME/.nvm"
 export LIBVA_DRIVER_NAME="iHD"
 export VDPAU_DRIVER="va_gl"
 
+export PATH=$PATH:$(go env GOPATH)/bin
 export GOPROXY=https://goproxy.cn,direct
 export GO111MODULE=on
