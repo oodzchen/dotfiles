@@ -1,5 +1,22 @@
 syntax on
+set number
+set autoindent
+set smartindent
+set textwidth=100
+" set runtimepath^=~/.vim/bundle/ctrlp.vim
+set shell=/usr/bin/zsh
 set background=dark
+
+let g:AutoPairsMapCh = 0
+
+call plug#begin()
+
+Plug 'cocopon/iceberg.vim'
+Plug 'jiangmiao/auto-pairs'
+Plug 'junegunn/fzf'
+
+call plug#end()
+
 colorscheme iceberg
 hi Normal guibg=NONE ctermbg=NONE
 
