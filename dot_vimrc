@@ -5,6 +5,7 @@ Plug 'jiangmiao/auto-pairs'
 Plug 'junegunn/fzf'
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries'  }
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'preservim/nerdtree'
 " Plug 'ycm-core/YouCompleteMe'
 
 call plug#end()
