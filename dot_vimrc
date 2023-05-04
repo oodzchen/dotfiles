@@ -1,21 +1,26 @@
-syntax on
-set number
-set autoindent
-set smartindent
-set textwidth=100
-" set runtimepath^=~/.vim/bundle/ctrlp.vim
-set shell=/usr/bin/zsh
-set background=dark
-
-let g:AutoPairsMapCh = 0
-
 call plug#begin()
 
 Plug 'cocopon/iceberg.vim'
 Plug 'jiangmiao/auto-pairs'
 Plug 'junegunn/fzf'
+Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries'  }
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+" Plug 'ycm-core/YouCompleteMe'
 
 call plug#end()
+syntax on
+set number
+set autoindent
+set autowrite
+set smartindent
+set textwidth=100
+set shell=/usr/bin/zsh
+set background=dark
+
+let g:AutoPairsMapCh = 0
+" Auto formatting and importing
+let g:go_fmt_autosave=1
+let g:go_fmt_command="goimports"
 
 colorscheme iceberg
 hi Normal guibg=NONE ctermbg=NONE
@@ -29,3 +34,7 @@ cnoremap <C-h> <Left>
 cnoremap <C-j> <Down>
 cnoremap <C-k> <Up>
 cnoremap <C-l> <Right>
+
+inoremap <expr> <cr> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
+
+autocmd BufWritePre *.json,*.go,*.c call CocAction('format')
