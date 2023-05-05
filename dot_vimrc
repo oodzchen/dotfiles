@@ -1,14 +1,17 @@
 call plug#begin()
 
 Plug 'cocopon/iceberg.vim'
+Plug 'nordtheme/vim'
 Plug 'jiangmiao/auto-pairs'
 Plug 'junegunn/fzf'
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries'  }
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'preservim/nerdtree'
+" Plug 'itchyny/lightline.vim'
 " Plug 'ycm-core/YouCompleteMe'
 
 call plug#end()
+
 syntax on
 set number
 set autoindent
@@ -17,13 +20,19 @@ set smartindent
 set textwidth=100
 set shell=/usr/bin/zsh
 set background=dark
+set timeoutlen=500
 
+colorscheme iceberg
+
+" set laststatus=2
+" set statusline=%F
+
+let mapleader = ","
 let g:AutoPairsMapCh = 0
 " Auto formatting and importing
 let g:go_fmt_autosave=1
 let g:go_fmt_command="goimports"
 
-colorscheme iceberg
 hi Normal guibg=NONE ctermbg=NONE
 
 " In insert or command mode, move normally by using Ctrl
@@ -37,5 +46,12 @@ cnoremap <C-k> <Up>
 cnoremap <C-l> <Right>
 
 inoremap <expr> <cr> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
+
+noremap <C-p> :FZF<CR>
+
+noremap <leader>w :w<CR>
+noremap <leader>q :q<CR>
+noremap <leader>b :NERDTreeToggle<CR>
+noremap <leader>f :FZF<CR>
 
 autocmd BufWritePre *.json,*.go,*.c call CocAction('format')
