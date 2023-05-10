@@ -1,0 +1,47 @@
+{
+	"languageserver": {
+		"ccls": {
+			"command": "ccls",
+			"filetypes": [
+				"c",
+				"cc",
+				"cpp",
+				"c++",
+				"objc",
+				"objcpp"
+			],
+			"rootPatterns": [
+				".ccls",
+				"compile_commands.json",
+				".git/",
+				".hg/"
+			],
+			"initializationOptions": {
+				"cache": {
+					"directory": "/tmp/ccls"
+				},
+				"client": {
+					"snippetSupport": true
+				},
+				"completion": {
+					"placeholder": false
+				}
+			}
+		},
+		"qml": {
+			"command": "qmlls6",
+			"filetypes": [
+				"qml"
+			]
+		},
+		"golang": {
+			"command": "gopls",
+			"rootPatterns": [
+				"go.mod"
+			],
+			"filetypes": [
+				"go"
+			]
+		}
+	}
+}
