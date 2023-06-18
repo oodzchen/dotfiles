@@ -14,22 +14,13 @@
 ;;(add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
 (package-initialize)
 
-(add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
-(let ((basedir "~/.emacs.d/themes/"))
-  (dolist (f (directory-files basedir))
-    (if (and (not (or (equal f ".") (equal f "..")))
-             (file-directory-p (concat basedir f)))
-        (add-to-list 'custom-theme-load-path (concat basedir f)))))
-
-(load-theme 'matrix t)
-(put 'downcase-region 'disabled nil)
-(put 'upcase-region 'disabled nil)
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages '(auto-complete flycheck go-mode lsp-mode)))
+ '(package-selected-packages
+   '(multiple-cursors helm lsp-mode flycheck zeno-theme auto-complete use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -37,17 +28,23 @@
  ;; If there is more than one, they won't work right.
  )
 
-(add-hook 'go-mode-hook 'lsp-deferred)
+(load-theme 'zeno t)
 
-(let ((default-directory  "~/.emacs.d/lisp/"))
-  (setq load-path
-        (append
-         (let ((load-path  (copy-sequence load-path))) ;; Shadow
-           (append 
-            (copy-sequence (normal-top-level-add-to-load-path '(".")))
-            (normal-top-level-add-subdirs-to-load-path)))
-         load-path)))
+(use-package helm
+  :ensure t
+  :config
+  (helm-mode 1)
+  :bind (("M-x" . helm-M-x)
+         ("C-x b" . helm-mini)
+         ("C-x C-f" . helm-find-files)))
 
-(require 'go-autocomplete)
-(require 'auto-complete-config)
-(ac-config-default)
+(use-package multiple-cursors
+  :ensure t
+  :bind (("C-c m c" . mc/edit-lines)
+         ("C-c m n" . mc/mark-next-like-this)
+         ("C-c m p" . mc/mark-previous-like-this)
+         ("C-c m a" . mc/mark-all-like-this)))
+
+(provide '.emacs)
+;;; .emacs ends here
+(put 'narrow-to-region 'disabled nil)

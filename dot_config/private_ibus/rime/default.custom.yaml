@@ -1,0 +1,16 @@
+patch:
+  schema_list:
+    - schema: luna_pinyin_simp # 朙月拼音 简化字模式
+    - schema: double_pinyin_flypy # 小鶴雙拼
+    - schema: wubi_pinyin # 五笔拼音混合
+  menu/page_size: 9
+  ascii_composer/switch_key:
+    Shift_L: commit_code
+  switcher/hotkeys:
+    - F4
+  key_binder/bindings:
+    - { when: has_menu, accept: "Control+p", send: Page_Up }
+    - { when: has_menu, accept: "Control+n", send: Page_Down }
+    - { when: has_menu, accept: "Tab", send: Down }
+    - { when: has_menu, accept: "Control+f", send: Down }
+    - { when: has_menu, accept: "Control+b", send: Up }

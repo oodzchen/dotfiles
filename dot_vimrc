@@ -7,6 +7,8 @@ Plug 'junegunn/fzf'
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries'  }
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'preservim/nerdtree'
+Plug 'tpope/vim-surround'
+Plug 'mattn/emmet-vim'
 " Plug 'itchyny/lightline.vim'
 " Plug 'ycm-core/YouCompleteMe'
 
@@ -14,13 +16,14 @@ call plug#end()
 
 syntax on
 set number
-set autoindent
+" set autoindent
 set autowrite
 set smartindent
 set textwidth=100
 set shell=/usr/bin/zsh
 set background=dark
 set timeoutlen=500
+set tags=./tags,tags;$HOME
 
 colorscheme iceberg
 
@@ -47,11 +50,14 @@ cnoremap <C-l> <Right>
 
 inoremap <expr> <cr> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
 
-noremap <C-p> :FZF<CR>
+" noremap <C-p> :FZF<CR>
 
 noremap <leader>w :w<CR>
 noremap <leader>q :q<CR>
-noremap <leader>b :NERDTreeToggle<CR>
+noremap <silent> <leader>b :NERDTreeToggle<CR>
 noremap <leader>f :FZF<CR>
+noremap <leader>gcc :!gcc -Wall -Wextra -o dist.out % && ./dist.out<CR>
+noremap <leader>nb :!npm run build<CR>
 
+autocmd FileType javascript,typescript,html,json setlocal shiftwidth=2 softtabstop=2 expandtab 
 autocmd BufWritePre *.json,*.go,*.c call CocAction('format')
