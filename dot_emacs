@@ -1,4 +1,18 @@
-(setq x-select-enable-clipboard t)
+
+;;; package --- Summary
+;;; Commentary:
+
+;;; Code:
+
+;; editor
+(setq select-enable-clipboard t)
+(setq dired-listing-switches "-aBhl  --group-directories-first")
+(tool-bar-mode -1)
+(menu-bar-mode -1)
+(global-linum-mode t)
+(add-to-list 'default-frame-alist '(height . 50))
+(add-to-list 'default-frame-alist '(width . 100))
+(add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono"))
 
 ;; proxy
 (setq url-proxy-services
@@ -20,7 +34,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(multiple-cursors helm lsp-mode flycheck zeno-theme auto-complete use-package)))
+   '(dumb-jump go-mode multiple-cursors helm lsp-mode flycheck zeno-theme auto-complete use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -29,6 +43,35 @@
  )
 
 (load-theme 'zeno t)
+
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode))
+
+(use-package lsp-mode
+  :init
+  ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
+  (setq lsp-keymap-prefix "C-c l")
+  :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
+         (go-mode . lsp)
+         ;; if you want which-key integration
+         (lsp-mode . lsp-enable-which-key-integration))
+  :commands lsp
+;;  :config
+;;  (setq lsp-ui-sideline-show-diagnostics t
+;;	lsp-ui-sideline-show-hover t
+;;	lsp-ui-sideline-show-code-actions t
+;;	)
+;;  (use-package lsp-ui-sideline))
+
+  :config
+  (setq lsp-ui-doc-enable t
+        lsp-ui-doc-position 'bottom
+        lsp-ui-doc-header t
+        lsp-ui-doc-include-signature t
+	lsp-ui-doc-delay 1
+	lsp-ui-doc-show-with-cursor t)
+  (use-package lsp-ui-doc))
 
 (use-package helm
   :ensure t
@@ -46,5 +89,10 @@
          ("C-c m a" . mc/mark-all-like-this)))
 
 (provide '.emacs)
-;;; .emacs ends here
+
 (put 'narrow-to-region 'disabled nil)
+
+(add-hook 'go-mode-hook 'lsp-deferred)
+(add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
+
+;;; .emacs ends here
