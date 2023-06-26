@@ -1,4 +1,3 @@
-
 ;;; package --- Summary
 ;;; Commentary:
 
@@ -7,6 +6,9 @@
 ;; editor
 (setq select-enable-clipboard t)
 (setq dired-listing-switches "-aBhl  --group-directories-first")
+(setq inhibit-startup-screen t)
+(setq linum-format "%d ") ;; Integer followed by space
+
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (global-linum-mode t)
@@ -34,7 +36,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(lsp-ui dumb-jump go-mode multiple-cursors helm lsp-mode flycheck zeno-theme auto-complete use-package)))
+   '(yafolding neotree rg ripgrep projectile company magit lsp-ui dumb-jump go-mode multiple-cursors helm lsp-mode flycheck zeno-theme use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -49,9 +51,11 @@
   :init (global-flycheck-mode))
 
 (use-package lsp-mode
+  :ensure t
   :init
   ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
   (setq lsp-keymap-prefix "C-c l")
+  (setq lsp-auto-guess-root t)
   :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
          (go-mode . lsp)
          ;; if you want which-key integration
@@ -88,11 +92,31 @@
          ("C-c m p" . mc/mark-previous-like-this)
          ("C-c m a" . mc/mark-all-like-this)))
 
+(use-package projectile
+  :ensure t
+  :config
+  (projectile-mode +1)
+  :bind
+  (("C-c p" . projectile-command-map)))
+
+(use-package neotree
+  :ensure t
+  :bind(("C-c n" . neotree-toggle)))
+
+(use-package yafolding
+  :ensure t
+  :config
+  (yafolding-mode 1)
+  :bind
+  (("C-{" . yafolding-hide-element)
+   ("C-}" . yafolding-show-element)))
+
 (provide '.emacs)
 
 (put 'narrow-to-region 'disabled nil)
 
 (add-hook 'go-mode-hook 'lsp-deferred)
 (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
+(add-hook 'after-init-hook 'global-company-mode)
 
 ;;; .emacs ends here
