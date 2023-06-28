@@ -7,10 +7,11 @@
 (setq select-enable-clipboard t)
 (setq dired-listing-switches "-aBhl  --group-directories-first")
 (setq inhibit-startup-screen t)
-(setq linum-format "%d ") ;; Integer followed by space
+(setq-default linum-format "%d ") ;; Integer followed by space
 
 (tool-bar-mode -1)
 (menu-bar-mode -1)
+(electric-pair-mode t)
 (global-linum-mode t)
 (add-to-list 'default-frame-alist '(height . 50))
 (add-to-list 'default-frame-alist '(width . 100))
@@ -36,7 +37,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(yafolding neotree rg ripgrep projectile company magit lsp-ui dumb-jump go-mode multiple-cursors helm lsp-mode flycheck zeno-theme use-package)))
+   '(yasnippet yafolding neotree rg ripgrep projectile company magit lsp-ui dumb-jump go-mode multiple-cursors helm lsp-mode flycheck zeno-theme use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -54,20 +55,10 @@
   :ensure t
   :init
   ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
-  (setq lsp-keymap-prefix "C-c l")
+  ;; (setq lsp-keymap-prefix "C-c l")
   (setq lsp-auto-guess-root t)
-  :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
-         (go-mode . lsp)
-         ;; if you want which-key integration
-         (lsp-mode . lsp-enable-which-key-integration))
-  :commands lsp
-;;  :config
-;;  (setq lsp-ui-sideline-show-diagnostics t
-;;	lsp-ui-sideline-show-hover t
-;;	lsp-ui-sideline-show-code-actions t
-;;	)
-;;  (use-package lsp-ui-sideline))
-
+  :hook (go-mode . lsp-deferred)
+  :commands (lsp lsp-deferred)
   :config
   (setq lsp-ui-doc-enable t
         lsp-ui-doc-position 'bottom
@@ -76,6 +67,24 @@
 	lsp-ui-doc-delay 1
 	lsp-ui-doc-show-with-cursor t)
   (use-package lsp-ui-doc))
+
+(defun my-go-mode-hook ()
+  ;; Use goimports instead of go-fmt
+  (setq-default gofmt-command "goimports")
+  ;; Call Gofmt before saving
+  (add-hook 'before-save-hook 'gofmt-before-save)
+  ;; Customize compile command to run go build
+  ;; (if (not (string-match "go" compile-command))
+  ;;     (set (make-local-variable 'compile-command)
+  ;;          "go build -v && go test -v && go vet"))
+  ;; Godef jump key binding
+  ;; (local-set-key (kbd "M-.") 'godef-jump)
+  ;; (local-set-key (kbd "M-*") 'pop-tag-mark)
+)
+
+(use-package go-mode
+  :ensure t
+  :hook (go-mode . my-go-mode-hook))
 
 (use-package helm
   :ensure t
@@ -115,7 +124,8 @@
 
 (put 'narrow-to-region 'disabled nil)
 
-(add-hook 'go-mode-hook 'lsp-deferred)
+;; (add-hook 'go-mode-hook 'lsp-deferred)
+
 (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
 (add-hook 'after-init-hook 'global-company-mode)
 
