@@ -11,8 +11,12 @@
 
 (tool-bar-mode -1)
 (menu-bar-mode -1)
+(scroll-bar-mode -1)
 (electric-pair-mode t)
 (global-linum-mode t)
+
+(add-to-list 'load-path "~/.emacs.d/lisp/")
+
 (add-to-list 'default-frame-alist '(height . 50))
 (add-to-list 'default-frame-alist '(width . 100))
 (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono"))
@@ -37,7 +41,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(yasnippet yafolding neotree rg ripgrep projectile company magit lsp-ui dumb-jump go-mode multiple-cursors helm lsp-mode flycheck zeno-theme use-package)))
+   '(company-quickhelp-terminal company-quickhelp company-box which-key god-mode yasnippet yafolding neotree rg ripgrep projectile company magit lsp-ui dumb-jump go-mode multiple-cursors helm lsp-mode flycheck zeno-theme use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -61,7 +65,7 @@
   :commands (lsp lsp-deferred)
   :config
   (setq lsp-ui-doc-enable t
-        lsp-ui-doc-position 'bottom
+        lsp-ui-doc-position 'right
         lsp-ui-doc-header t
         lsp-ui-doc-include-signature t
 	lsp-ui-doc-delay 1
@@ -80,7 +84,7 @@
   ;; Godef jump key binding
   ;; (local-set-key (kbd "M-.") 'godef-jump)
   ;; (local-set-key (kbd "M-*") 'pop-tag-mark)
-)
+  )
 
 (use-package go-mode
   :ensure t
@@ -120,6 +124,38 @@
   (("C-{" . yafolding-hide-element)
    ("C-}" . yafolding-show-element)))
 
+(use-package god-mode
+  :ensure t
+  :bind(("<escape>" . god-mode-all)))
+
+(use-package which-key
+  :ensure t
+  :config
+  (which-key-mode +1))
+
+(use-package company
+  :ensure t
+  :hook (after-init . global-company-mode))
+
+(use-package company-box
+  :ensure t
+  :hook (company-mode . company-box-mode))
+
+(use-package company-quickhelp
+  :ensure t
+  :hook (company-mode . company-quickhelp-mode))
+
+(use-package company-quickhelp-terminal
+  :ensure t
+  :config
+  (setq company-quickhelp-use-propertized-text nil)
+  :hook (company-quickhelp-mode . company-quickhelp-terminal-mode))
+
+(use-package yasnippet
+  :ensure t
+  :config
+  (yas-global-mode 1))
+
 (provide '.emacs)
 
 (put 'narrow-to-region 'disabled nil)
@@ -127,6 +163,6 @@
 ;; (add-hook 'go-mode-hook 'lsp-deferred)
 
 (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
-(add-hook 'after-init-hook 'global-company-mode)
+;; (add-hook 'after-init-hook 'global-company-mode)
 
 ;;; .emacs ends here
