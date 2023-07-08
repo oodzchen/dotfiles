@@ -7,6 +7,7 @@
 (setq select-enable-clipboard t)
 (setq dired-listing-switches "-aBhl  --group-directories-first")
 (setq inhibit-startup-screen t)
+;; (setq debug-on-error t)
 (setq-default linum-format "%d ") ;; Integer followed by space
 
 (tool-bar-mode -1)
@@ -20,6 +21,11 @@
 (add-to-list 'default-frame-alist '(height . 50))
 (add-to-list 'default-frame-alist '(width . 100))
 (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono"))
+
+;; keybindings
+(global-set-key (kbd "M-p") 'previous-line)
+(global-set-key (kbd "M-n") 'next-line)
+(global-set-key (kbd "C-<return>") 'browse-url-at-point)
 
 ;; proxy
 (setq url-proxy-services
@@ -41,7 +47,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(company-quickhelp-terminal company-quickhelp company-box which-key god-mode yasnippet yafolding neotree rg ripgrep projectile company magit lsp-ui dumb-jump go-mode multiple-cursors helm lsp-mode flycheck zeno-theme use-package)))
+   '(expand-region company-quickhelp-terminal company-quickhelp company-box which-key god-mode yasnippet yafolding neotree rg ripgrep projectile company magit lsp-ui dumb-jump go-mode multiple-cursors helm lsp-mode flycheck zeno-theme use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -65,7 +71,7 @@
   :commands (lsp lsp-deferred)
   :config
   (setq lsp-ui-doc-enable t
-        lsp-ui-doc-position 'right
+        lsp-ui-doc-position 'at-point
         lsp-ui-doc-header t
         lsp-ui-doc-include-signature t
 	lsp-ui-doc-delay 1
@@ -155,6 +161,10 @@
   :ensure t
   :config
   (yas-global-mode 1))
+
+(use-package expand-region
+  :ensure t
+  :bind(("C-'" . er/expand-region)))
 
 (provide '.emacs)
 
