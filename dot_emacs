@@ -7,8 +7,34 @@
 (setq select-enable-clipboard t)
 (setq dired-listing-switches "-aBhl  --group-directories-first")
 (setq inhibit-startup-screen t)
+(setq frame-title-format
+    '((:eval (if (buffer-file-name)
+                  (abbreviate-file-name (buffer-file-name))
+                    "%b"))
+      (:eval (if (buffer-modified-p)
+                 " *"))
+      " - Emacs")
+  )
 ;; (setq debug-on-error t)
 (setq-default linum-format "%d ") ;; Integer followed by space
+(setq-default mode-line-format
+	      '("%e"
+		mode-line-front-space
+		mode-line-mule-info
+		mode-line-client
+		mode-line-modified
+		mode-line-remote
+		mode-line-frame-identification
+		;; mode-line-buffer-identification
+		(:eval (abbreviate-file-name (buffer-file-name)))
+		"  "
+		mode-line-position
+
+		(vc-mode vc-mode)
+		"  "
+		mode-line-modes
+		mode-line-misc-info
+		mode-line-end-spaces))
 
 (tool-bar-mode -1)
 (menu-bar-mode -1)
@@ -47,7 +73,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(expand-region company-quickhelp-terminal company-quickhelp company-box which-key god-mode yasnippet yafolding neotree rg ripgrep projectile company magit lsp-ui dumb-jump go-mode multiple-cursors helm lsp-mode flycheck zeno-theme use-package)))
+   '(projectile-rails expand-region company-quickhelp-terminal company-quickhelp company-box which-key god-mode yasnippet yafolding neotree rg ripgrep projectile company magit lsp-ui dumb-jump go-mode multiple-cursors helm lsp-mode flycheck zeno-theme use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -94,7 +120,8 @@
 
 (use-package go-mode
   :ensure t
-  :hook (go-mode . my-go-mode-hook))
+  :hook ((go-mode . my-go-mode-hook)
+	 (go-mode . hs-minor-mode)))
 
 (use-package helm
   :ensure t
@@ -132,7 +159,11 @@
 
 (use-package god-mode
   :ensure t
-  :bind(("<escape>" . god-mode-all)))
+  ;; :init
+  ;; (god-mode-all)
+  :hook (after-init . god-mode)
+  :bind (("C-c g" . god-mode-all)
+	 ("<escape>" . god-mode-all)))
 
 (use-package which-key
   :ensure t
@@ -164,7 +195,14 @@
 
 (use-package expand-region
   :ensure t
-  :bind(("C-'" . er/expand-region)))
+  :bind (("C-'" . er/expand-region)))
+
+(use-package view
+  :bind (:map view-mode-map
+	      ("n" . next-line)
+	      ("p" . previous-line)
+	      ("v" . scroll-up-command)
+	      ("M-v" . scroll-down-command)))
 
 (provide '.emacs)
 
