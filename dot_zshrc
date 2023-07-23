@@ -103,18 +103,21 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-alias sudo="sudo "
-alias cfw="/home/kholin/Documents/CFW/cfw"
 alias open="xdg-open"
-alias logout="gnome-session-quit"
+alias krestart="/home/kholin/scripts/krestart.sh"
+alias enw="emacs -nw"
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-export LIBVA_DRIVER_NAME="iHD"
-export VDPAU_DRIVER="va_gl"
+# export LIBVA_DRIVER_NAME="iHD"
+# export VDPAU_DRIVER="va_gl"
 
-export PATH=$PATH:$(go env GOPATH)/bin
-export GOPROXY=https://goproxy.cn,direct
+export PATH=$PATH:$HOME/.local/bin
+export PATH=$PATH:/usr/local/go/bin
+export PATH=$HOME/go/bin:$PATH
+
 export GO111MODULE=on
+export PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/local/lib/pkgconfig
+
