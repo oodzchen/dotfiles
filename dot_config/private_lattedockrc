@@ -1,3 +1,8 @@
+[KFileDialog Settings]
+Recent Files[$e]=shutdownOrSwitch-20210609174709.plasmoid,file:$HOME/Downloads/netspeed-widget-1.9.plasmoid,file:$HOME/Downloads/shutdownOrSwitch-20210609174709.plasmoid
+Recent URLs[$e]=file:$HOME/Downloads/,file:$HOME/
+detailViewIconSize=16
+
 [LatteSettingsDialog]
 downloadWindowSize=980,600
 windowSize=1100,750
@@ -16,8 +21,11 @@ sortColumn=2
 sortOrder=0
 windowSize=980,721
 
+[PlasmaThemeExtended]
+outlineWidth=1
+
 [PlasmaTransientsConfig]
-PreloadWeight=0
+PreloadWeight=42
 
 [ScreenConnectors]
 10=DP-2:::0,0 3072x1728
