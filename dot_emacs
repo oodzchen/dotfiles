@@ -35,6 +35,11 @@
 		mode-line-modes
 		mode-line-misc-info
 		mode-line-end-spaces))
+(setq backup-directory-alist '(("." . "~/.emacs_backups")))
+(setq-default company-quickhelp-color-background "#000000")
+(setq-default web-mode-engines-alist
+      '(("go"    . "\\.tmpl\\'"))
+)
 
 (tool-bar-mode -1)
 (menu-bar-mode -1)
@@ -52,6 +57,8 @@
 (global-set-key (kbd "M-p") 'previous-line)
 (global-set-key (kbd "M-n") 'next-line)
 (global-set-key (kbd "C-<return>") 'browse-url-at-point)
+(global-set-key (kbd "C-c C-/") 'comment-line)
+(global-set-key (kbd "C-c C-<tab>") 'previous-buffer)
 
 ;; proxy
 (setq url-proxy-services
@@ -73,7 +80,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(projectile-rails expand-region company-quickhelp-terminal company-quickhelp company-box which-key god-mode yasnippet yafolding neotree rg ripgrep projectile company magit lsp-ui dumb-jump go-mode multiple-cursors helm lsp-mode flycheck zeno-theme use-package)))
+   '(keyfreq winum docker-compose-mode dockerfile-mode docker restart-emacs web-mode rg company-quickhelp tide typescript-mode emmet-mode projectile-rails expand-region company-box which-key god-mode yasnippet yafolding neotree ripgrep projectile company magit lsp-ui dumb-jump go-mode multiple-cursors helm lsp-mode flycheck zeno-theme use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -109,6 +116,7 @@
   (setq-default gofmt-command "goimports")
   ;; Call Gofmt before saving
   (add-hook 'before-save-hook 'gofmt-before-save)
+  (unbind-key "C-c C-d" 'go-mode-map)
   ;; Customize compile command to run go build
   ;; (if (not (string-match "go" compile-command))
   ;;     (set (make-local-variable 'compile-command)
@@ -128,7 +136,7 @@
   :config
   (helm-mode 1)
   :bind (("M-x" . helm-M-x)
-         ("C-x b" . helm-mini)
+         ("C-x C-b" . helm-mini)
          ("C-x C-f" . helm-find-files)))
 
 (use-package multiple-cursors
@@ -157,13 +165,13 @@
   (("C-{" . yafolding-hide-element)
    ("C-}" . yafolding-show-element)))
 
-(use-package god-mode
-  :ensure t
-  ;; :init
-  ;; (god-mode-all)
-  :hook (after-init . god-mode)
-  :bind (("C-c g" . god-mode-all)
-	 ("<escape>" . god-mode-all)))
+;; (use-package god-mode
+;;   :ensure t
+;;   ;; :init
+;;   ;; (god-mode-all)
+;;   :hook (after-init . god-mode)
+;;   :bind (("C-c g" . god-mode-all)
+;; 	 ("<escape>" . god-mode-all)))
 
 (use-package which-key
   :ensure t
@@ -174,19 +182,14 @@
   :ensure t
   :hook (after-init . global-company-mode))
 
-(use-package company-box
-  :ensure t
-  :hook (company-mode . company-box-mode))
+;; (use-package company-box
+;;   :ensure t
+;;   :hook (company-mode . company-box-mode))
 
 (use-package company-quickhelp
   :ensure t
-  :hook (company-mode . company-quickhelp-mode))
-
-(use-package company-quickhelp-terminal
-  :ensure t
   :config
-  (setq company-quickhelp-use-propertized-text nil)
-  :hook (company-quickhelp-mode . company-quickhelp-terminal-mode))
+  :hook (company-mode . company-quickhelp-mode))
 
 (use-package yasnippet
   :ensure t
@@ -204,6 +207,35 @@
 	      ("v" . scroll-up-command)
 	      ("M-v" . scroll-down-command)))
 
+(use-package tide
+  :ensure t
+  :after (typescript-mode company flycheck)
+  :hook ((typescript-mode . tide-setup)
+         (typescript-mode . tide-hl-identifier-mode)
+         (before-save . tide-format-before-save)))
+
+(use-package web-mode
+  :ensure t
+  :mode (("\\.tmpl\\'" . web-mode)))
+
+(use-package emmet-mode
+  :ensure t
+  :hook ((web-mode . emmet-mode)))
+
+(use-package winum
+  :ensure t
+  :config (winum-mode 1))
+
+(require 'keyfreq)
+(keyfreq-mode 1)
+(keyfreq-autosave-mode 1)
+
+;; (eval-after-load 'flycheck
+;;    '(flycheck-add-mode 'html-tidy 'web-mode))
+
+(require 'bind-key)
+(bind-key* "C-c C-d" 'mc/mark-next-like-this)
+
 (provide '.emacs)
 
 (put 'narrow-to-region 'disabled nil)
@@ -211,6 +243,8 @@
 ;; (add-hook 'go-mode-hook 'lsp-deferred)
 
 (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
+(add-hook 'html-mode-hook 'emmet-mode)
+;; (add-hook 'minibuffer-setup-hook )
 ;; (add-hook 'after-init-hook 'global-company-mode)
 
 ;;; .emacs ends here
