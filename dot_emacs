@@ -8,13 +8,13 @@
 (setq dired-listing-switches "-aBhl  --group-directories-first")
 (setq inhibit-startup-screen t)
 (setq frame-title-format
-    '((:eval (if (buffer-file-name)
-                  (abbreviate-file-name (buffer-file-name))
-                    "%b"))
-      (:eval (if (buffer-modified-p)
-                 " *"))
-      " - Emacs")
-  )
+      '((:eval (if (buffer-file-name)
+                   (abbreviate-file-name (buffer-file-name))
+                 "%b"))
+	(:eval (if (buffer-modified-p)
+                   " *"))
+	" - Emacs")
+      )
 ;; (setq debug-on-error t)
 (setq-default linum-format "%d ") ;; Integer followed by space
 (setq-default mode-line-format
@@ -38,14 +38,18 @@
 (setq backup-directory-alist '(("." . "~/.emacs_backups")))
 (setq-default company-quickhelp-color-background "#000000")
 (setq-default web-mode-engines-alist
-      '(("go"    . "\\.tmpl\\'"))
-)
+	      '(("go"    . "\\.tmpl\\'"))
+	      )
 
 (tool-bar-mode -1)
 (menu-bar-mode -1)
 (scroll-bar-mode -1)
 (electric-pair-mode t)
-(global-linum-mode t)
+;; (global-linum-mode t)
+
+(global-display-line-numbers-mode 1)
+;; Alternatively, to use it only in programming modes:
+(add-hook 'prog-mode-hook #'display-line-numbers-mode)
 
 (add-to-list 'load-path "~/.emacs.d/lisp/")
 
@@ -62,9 +66,9 @@
 
 ;; proxy
 (setq url-proxy-services
-   '(("no_proxy" . "^\\(localhost\\|10\\..*\\|192\\.168\\..*\\)")
-     ("http" . "127.0.0.1:1089")
-     ("https" . "127.0.0.1:1089")))
+      '(("no_proxy" . "^\\(localhost\\|10\\..*\\|192\\.168\\..*\\)")
+	("http" . "127.0.0.1:1089")
+	("https" . "127.0.0.1:1089")))
 
 ;; melpa
 (require 'package)
@@ -235,6 +239,8 @@
 
 (require 'bind-key)
 (bind-key* "C-c C-d" 'mc/mark-next-like-this)
+(bind-key* "C-c C-f" 'projectile-find-file)
+(bind-key* "C-c C-r" 'rg)
 
 (provide '.emacs)
 
