@@ -222,6 +222,10 @@
   :ensure t
   :mode (("\\.tmpl\\'" . web-mode)))
 
+(use-package typescript-mode
+  :ensure t
+  :mode (("\\.js\\'" . typescript-mode)))
+
 (use-package emmet-mode
   :ensure t
   :hook ((web-mode . emmet-mode)))
