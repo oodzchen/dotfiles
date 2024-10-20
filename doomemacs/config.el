@@ -88,7 +88,7 @@
 (global-set-key (kbd "C-c C-<tab>") 'previous-buffer)
 (global-set-key (kbd "C-c C-d") 'mc/mark-next-like-this)
 (global-set-key (kbd "C-c C-f") 'projectile-find-file)
-(global-set-key (kbd "C-c C-r") 'rg)
+(global-set-key (kbd "C-c C-r") '+default/search-project)
 (global-set-key (kbd "C-c m c") 'mc/edit-lines)
 (global-set-key (kbd "C-a") 'move-beginning-of-line)
 
@@ -107,11 +107,12 @@
         lsp-ui-doc-position 'at-point
         lsp-ui-doc-show-with-cursor t))
 
-(after! company
-  (setq company-tooltip-maximum-width 50))
+;; (after! company
+;;   (setq company-tooltip-maximum-width 50)
+;;   (setq company-minimum-prefix-length 3))
 
-(use-package! company-quickhelp
-  :hook (company-mode . company-quickhelp-mode))
+;; (use-package! company-quickhelp
+;;   :hook (company-mode . company-quickhelp-mode))
 
 (use-package! lsp-tailwindcss
   :init
@@ -123,3 +124,12 @@
                                       typescript-mode
                                       typescript-tsx-mode
                                       tsx-ts-mode)))
+
+(use-package! exec-path-from-shell
+  :init)
+
+(use-package! prettier-js
+  :hook (web-mode . prettier-js-mode))
+
+(use-package! editorconfig)
+(editorconfig-mode 1)
