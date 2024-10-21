@@ -91,6 +91,9 @@
 (global-set-key (kbd "C-c C-r") '+default/search-project)
 (global-set-key (kbd "C-c m c") 'mc/edit-lines)
 (global-set-key (kbd "C-a") 'move-beginning-of-line)
+(global-set-key (kbd "C-e") 'move-end-of-line)
+(global-set-key (kbd "C-<") 'web-mode-fold-or-unfold)
+(global-set-key (kbd "C->") 'web-mode-fold-or-unfold)
 
 ;; (global-set-key (kbd "C-c m n") 'mc/mark-next-like-this)
 ;; (global-set-key (kbd "C-c m p") 'mc/mark-previous-like-this)
@@ -133,3 +136,6 @@
 
 (use-package! editorconfig)
 (editorconfig-mode 1)
+
+(after! web-mode
+  (setq web-mode-enable-auto-indentation nil))
