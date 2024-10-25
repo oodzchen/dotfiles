@@ -79,6 +79,8 @@
 (setq confirm-kill-emacs nil)
 (setq warning-minimum-level :error)
 (setq +default-want-RET-continue-comments nil)
+(setq dired-listing-switches "-aBhl  --group-directories-first")
+(setq initial-major-mode 'c-mode)
 
 (global-set-key (kbd "C-x C-b") 'helm-mini)
 (global-set-key (kbd "M-p") 'backward-paragraph)
@@ -139,3 +141,6 @@
 
 (after! web-mode
   (setq web-mode-enable-auto-indentation nil))
+
+(require 'dired-quick-sort)
+(dired-quick-sort-setup)
