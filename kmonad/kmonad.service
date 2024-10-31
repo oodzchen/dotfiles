@@ -1,0 +1,17 @@
+[Unit]
+Description=KMonad Keyboard Configuration
+Documentation=https://github.com/kmonad/kmonad
+After=network.target
+
+[Service]
+Type=simple
+Environment=PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/bin
+ExecStart=/home/kholin/scripts/kmonad_keyboard_remap.sh
+Restart=always
+RestartSec=5
+User=root
+Group=root
+
+
+[Install]
+WantedBy=multi-user.target
