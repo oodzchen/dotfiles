@@ -96,16 +96,21 @@
 (global-set-key (kbd "C-e") 'move-end-of-line)
 (global-set-key (kbd "C-<") 'web-mode-fold-or-unfold)
 (global-set-key (kbd "C->") 'web-mode-fold-or-unfold)
+(global-set-key (kbd "C-c g") 'god-mode-all)
 
 ;; (global-set-key (kbd "C-c m n") 'mc/mark-next-like-this)
 ;; (global-set-key (kbd "C-c m p") 'mc/mark-previous-like-this)
 ;; (global-set-key (kbd "C-c m a") 'mc/mark-all-like-this)
 
-(add-to-list 'default-frame-alist '(height . 50))
-(add-to-list 'default-frame-alist '(width . 100))
+;; (add-to-list 'default-frame-alist '(height . 50))
+;; (add-to-list 'default-frame-alist '(width . 100))
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
 (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono"))
 
 (map! "C-j" #'emmet-expand-line)
+
+(after! lsp-mode
+  (setq lsp-auto-guess-root t))
 
 (after! lsp-ui
   (setq lsp-ui-doc-enable t
@@ -130,8 +135,8 @@
                                       typescript-tsx-mode
                                       tsx-ts-mode)))
 
-(use-package! exec-path-from-shell
-  :init)
+;; (use-package! exec-path-from-shell
+;;   :init)
 
 (use-package! prettier-js
   :hook (web-mode . prettier-js-mode))
@@ -142,5 +147,12 @@
 (after! web-mode
   (setq web-mode-enable-auto-indentation nil))
 
-(require 'dired-quick-sort)
-(dired-quick-sort-setup)
+(use-package! god-mode
+  :config
+  (god-mode)
+  (god-mode-all))
+
+(require 'benchmark-init)
+;; To disable collection of benchmark data after init is done.
+(add-hook 'after-init-hook 'benchmark-init/deactivate)
+(add-hook 'before-save-hook #'lsp-organize-imports)

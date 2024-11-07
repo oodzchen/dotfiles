@@ -58,3 +58,9 @@
 
 (package! lsp-tailwindcss
   :recipe (:host github :repo "merrickluo/lsp-tailwindcss"))
+
+(package! prettier-js)
+
+(package! benchmark-init)
+
+(package! go-tag)
