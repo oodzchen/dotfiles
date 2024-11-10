@@ -92,6 +92,7 @@
 (global-set-key (kbd "C-c C-d") 'mc/mark-next-like-this)
 (global-set-key (kbd "C-c C-f") 'projectile-find-file)
 (global-set-key (kbd "C-c C-r") '+default/search-project)
+(global-set-key (kbd "C-c C-s") '+default/search-project)
 (global-set-key (kbd "C-c m c") 'mc/edit-lines)
 (global-set-key (kbd "C-a") 'move-beginning-of-line)
 (global-set-key (kbd "C-e") 'move-end-of-line)
