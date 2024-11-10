@@ -1,0 +1,1 @@
+rm -rf .config/emacs/.local/straight/repos/lsp-* .config/emacs/.local/straight/build-*/lsp-* .config/emacs/.local/straight/repos/rust* .config/emacs/.local/straight/build-*/rust*
