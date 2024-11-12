@@ -82,6 +82,9 @@
 (setq +default-want-RET-continue-comments nil)
 (setq dired-listing-switches "-aBhl  --group-directories-first")
 (setq initial-major-mode 'c-mode)
+(setq go-tag-args (list "-transform" "camelcase"))
+(setq lsp-modeline-code-actions-enable nil)
+(setq yas-snippet-revival nil) ;; To prevent yas breaks undo history
 
 (global-set-key (kbd "C-x C-b") 'helm-mini)
 (global-set-key (kbd "M-p") 'backward-paragraph)
@@ -143,9 +146,6 @@
 (use-package! prettier-js
   :hook (web-mode . prettier-js-mode))
 
-(use-package! editorconfig)
-(editorconfig-mode 1)
-
 (after! web-mode
   (setq web-mode-enable-auto-indentation nil))
 
@@ -157,7 +157,7 @@
 (require 'benchmark-init)
 ;; To disable collection of benchmark data after init is done.
 (add-hook 'after-init-hook 'benchmark-init/deactivate)
-(add-hook 'before-save-hook #'lsp-organize-imports)
+
 
 (defun lsp-booster--advice-json-parse (old-fn &rest args)
   "Try to parse bytecode instead of json."
