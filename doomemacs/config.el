@@ -102,6 +102,7 @@
 (global-set-key (kbd "C-<") 'web-mode-fold-or-unfold)
 (global-set-key (kbd "C->") 'web-mode-fold-or-unfold)
 (global-set-key (kbd "C-c g") 'god-mode-all)
+(global-set-key (kbd "C-,") 'god-mode-all)
 
 ;; (global-set-key (kbd "C-c m n") 'mc/mark-next-like-this)
 ;; (global-set-key (kbd "C-c m p") 'mc/mark-previous-like-this)
