@@ -64,3 +64,5 @@
 (package! benchmark-init)
 
 (package! go-tag)
+
+(package! diminish)
