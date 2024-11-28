@@ -33,6 +33,10 @@
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
 (setq doom-theme 'zeno)
+(set-face-attribute 'show-paren-match nil
+                    :background "#333333"
+                    :foreground "#E8F0FF"
+                    :weight 'bold)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -54,7 +58,7 @@
 ;;   - Setting file/directory variables (like `org-directory')
 ;;   - Setting variables which explicitly tell you to set them before their
 ;;     package is loaded (see 'C-h v VARIABLE' to look up their documentation).
-;;   - Setting doom variables (which start with 'doom-' or '+').
+;;   - Setting doom variables (which start with 'doom-' or '+'.)
 ;;
 ;; Here are some additional functions/macros that will help you configure Doom.
 ;;
@@ -85,6 +89,7 @@
 (setq go-tag-args (list "-transform" "camelcase"))
 (setq lsp-modeline-code-actions-enable nil)
 (setq yas-snippet-revival nil) ;; To prevent yas breaks undo history
+;; (setq +format-with-lsp nil)
 
 (global-set-key (kbd "C-x C-b") 'helm-mini)
 (global-set-key (kbd "M-p") 'backward-paragraph)
@@ -93,7 +98,6 @@
 (global-set-key (kbd "C-c C-/") 'comment-line)
 (global-set-key (kbd "C-c C-<tab>") 'previous-buffer)
 (global-set-key (kbd "C-c C-d") 'mc/mark-next-like-this)
-(global-set-key (kbd "C-c C-f") 'projectile-find-file)
 (global-set-key (kbd "C-c C-r") '+default/search-project)
 (global-set-key (kbd "C-c C-s") '+default/search-project)
 (global-set-key (kbd "C-c m c") 'mc/edit-lines)
@@ -144,6 +148,10 @@
 ;; (use-package! exec-path-from-shell
 ;;   :init)
 
+(use-package! web-mode
+  :mode
+  (("\\.tmpl\\'" . web-mode)))
+
 (use-package! prettier-js
   :hook (web-mode . prettier-js-mode))
 
@@ -156,12 +164,21 @@
   (god-mode-all))
 
 (require 'diminish)
-(setq minor-mode-alist nil)
+(diminish 'projectile-mode)
+
+;; (load! "~/.config/doom/flow-for-emacs/flow.el")
 
 (require 'benchmark-init)
 ;; To disable collection of benchmark data after init is done.
 (add-hook 'after-init-hook 'benchmark-init/deactivate)
 
+;; (setq-hook! 'typescript-tsx-mode +format-with-lsp nil)
+
+;; (add-hook! 'typescript-tsx-mode-hook
+;;   (remove-hook 'before-save-hook #'lsp-organize-imports :local))
+
+;; (add-hook! 'go-mode-hook
+;;   (add-hook 'before-save-hook #'lsp-organize-imports :local))
 
 (defun lsp-booster--advice-json-parse (old-fn &rest args)
   "Try to parse bytecode instead of json."
