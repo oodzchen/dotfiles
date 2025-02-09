@@ -66,3 +66,5 @@
 (package! go-tag)
 
 (package! diminish)
+
+(package! rg)

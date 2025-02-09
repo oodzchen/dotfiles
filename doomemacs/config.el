@@ -80,6 +80,7 @@
 ;; they are implemented.
 
 (setq lsp-use-plists "true")
+(setq debug-on-error nil)
 
 (setq confirm-kill-emacs nil)
 (setq warning-minimum-level :error)
@@ -89,6 +90,7 @@
 (setq go-tag-args (list "-transform" "camelcase"))
 (setq lsp-modeline-code-actions-enable nil)
 (setq yas-snippet-revival nil) ;; To prevent yas breaks undo history
+(setq sqlformat-command 'pgformatter)
 ;; (setq +format-with-lsp nil)
 
 (global-set-key (kbd "C-x C-b") 'helm-mini)
@@ -171,6 +173,7 @@
 (require 'benchmark-init)
 ;; To disable collection of benchmark data after init is done.
 (add-hook 'after-init-hook 'benchmark-init/deactivate)
+(add-hook 'sql-mode-hook 'sqlformat-on-save-mode)
 
 ;; (setq-hook! 'typescript-tsx-mode +format-with-lsp nil)
 
