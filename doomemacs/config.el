@@ -32,6 +32,9 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
+
+(set-fontset-font t 'han "Noto Sans CJK SC Regular")
+
 (setq doom-theme 'zeno)
 (set-face-attribute 'show-paren-match nil
                     :background "#333333"
