@@ -36,10 +36,13 @@
 		mode-line-misc-info
 		mode-line-end-spaces))
 (setq backup-directory-alist '(("." . "~/.emacs_backups")))
-(setq-default company-quickhelp-color-background "#000000")
+;; (setq-default company-quickhelp-color-background "#000000")
 (setq-default web-mode-engines-alist
 	      '(("go"    . "\\.tmpl\\'"))
 	      )
+(setq-default prettier-js-use-modules-bin t)
+(setq-default typescript-indent-level 2)
+(setq-default typescript-auto-indent-flag t)
 
 (tool-bar-mode -1)
 (menu-bar-mode -1)
@@ -58,11 +61,14 @@
 (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono"))
 
 ;; keybindings
-(global-set-key (kbd "M-p") 'previous-line)
-(global-set-key (kbd "M-n") 'next-line)
+(global-set-key (kbd "C-x C-b") 'helm-mini)
+(global-set-key (kbd "M-p") 'backward-paragraph)
+(global-set-key (kbd "M-n") 'forward-paragraph)
 (global-set-key (kbd "C-<return>") 'browse-url-at-point)
 (global-set-key (kbd "C-c C-/") 'comment-line)
 (global-set-key (kbd "C-c C-<tab>") 'previous-buffer)
+(global-set-key (kbd "C-c g") 'god-mode-all)
+(global-set-key (kbd "C-,") 'god-mode-all)
 
 ;; proxy
 (setq url-proxy-services
@@ -84,7 +90,13 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(keyfreq winum docker-compose-mode dockerfile-mode docker restart-emacs web-mode rg company-quickhelp tide typescript-mode emmet-mode projectile-rails expand-region company-box which-key god-mode yasnippet yafolding neotree ripgrep projectile company magit lsp-ui dumb-jump go-mode multiple-cursors helm lsp-mode flycheck zeno-theme use-package)))
+   '(company company-box company-quickhelp docker
+	  docker-compose-mode dockerfile-mode dumb-jump emmet-mode
+	  expand-region flycheck go-mode god-mode helm keyfreq
+	  lsp-mode lsp-ui magit multiple-cursors neotree orderless
+	  prettier-js projectile projectile-rails restart-emacs rg
+	  ripgrep tide typescript-mode use-package web-mode which-key
+	  winum yafolding yasnippet zeno-theme)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -157,9 +169,9 @@
   :bind
   (("C-c p" . projectile-command-map)))
 
-(use-package neotree
-  :ensure t
-  :bind(("C-c n" . neotree-toggle)))
+;; (use-package neotree
+;;   :ensure t
+;;   :bind(("C-c n" . neotree-toggle)))
 
 (use-package yafolding
   :ensure t
@@ -186,14 +198,15 @@
   :ensure t
   :hook (after-init . global-company-mode))
 
-;; (use-package company-box
-;;   :ensure t
-;;   :hook (company-mode . company-box-mode))
+(use-package company-box
+  :ensure t
+  :hook (company-mode . company-box-mode))
 
 (use-package company-quickhelp
   :ensure t
   :config
   :hook (company-mode . company-quickhelp-mode))
+
 
 (use-package yasnippet
   :ensure t
@@ -234,12 +247,13 @@
   :ensure t
   :config (winum-mode 1))
 
+(use-package prettier-js
+  :ensure t
+  :hook (web-mode . prettier-js-mode))
+
 (require 'keyfreq)
 (keyfreq-mode 1)
 (keyfreq-autosave-mode 1)
-
-;; (eval-after-load 'flycheck
-;;    '(flycheck-add-mode 'html-tidy 'web-mode))
 
 (require 'bind-key)
 (bind-key* "C-c C-d" 'mc/mark-next-like-this)
