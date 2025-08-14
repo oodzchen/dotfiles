@@ -57,6 +57,7 @@
 (electric-pair-mode t)
 (global-auto-revert-mode 1)
 (column-number-mode 1)
+(recentf-mode 1)
 ;; (global-linum-mode t)
 
 (global-display-line-numbers-mode 1)
@@ -68,18 +69,6 @@
 (add-to-list 'default-frame-alist '(height . 50))
 (add-to-list 'default-frame-alist '(width . 100))
 (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono"))
-
-;; keybindings
-;; (global-set-key (kbd "C-x C-b") 'helm-mini)
-;; (global-set-key (kbd "C-x C-b") 'consult-buffer)
-(global-set-key (kbd "M-p") 'backward-paragraph)
-(global-set-key (kbd "M-n") 'forward-paragraph)
-(global-set-key (kbd "C-<return>") 'browse-url-at-point)
-(global-set-key (kbd "C-c C-/") 'comment-line)
-(global-set-key (kbd "C-c C-<tab>") 'previous-buffer)
-(global-set-key (kbd "C-c C-s") 'projectile-ripgrep)
-(global-set-key (kbd "C-c g") 'god-mode-all)
-(global-set-key (kbd "C-,") 'god-mode-all)
 
 ;; proxy
 (setq url-proxy-services
@@ -528,13 +517,13 @@
          ("M-x" . execute-extended-command)  ; 使用增强的原生版本
          ;; 其他有用的替代
          ;; ("C-s" . consult-line)           ; 替代 helm-occur
-         ("C-c s" . consult-ripgrep)      ; 替代 helm-rg
-         ("C-c f" . consult-find)         ; 查找文件
+         ;; ("C-c s" . consult-ripgrep)      ; 替代 helm-rg
+         ;; ("C-c f" . consult-find)         ; 查找文件
          ("C-c r" . consult-recent-file)  ; 最近文件
-         ("C-c g" . consult-goto-line)    ; 跳转行
+         ;; ("C-c g" . consult-goto-line)    ; 跳转行
          ("C-c i" . consult-imenu)        ; 符号导航
          ("M-g e" . consult-compile-error)
-         ("M-g f" . consult-flymake)
+         ;; ("M-g f" . consult-flymake)
          ("M-y" . consult-yank-pop))      ; 替代 helm-show-kill-ring
   :config
   (consult-customize
@@ -612,7 +601,21 @@
   ;; Run in add-on mode to prevent server conflicts
   (setq lsp-tailwindcss-add-on-mode t))
 
+(use-package deadgrep
+  :straight t)
+
 (require 'bind-key)
+;; Global keybindings with highest priority (override mode-specific bindings)
+(bind-key* "M-p" 'backward-paragraph)
+(bind-key* "M-n" 'forward-paragraph)
+(bind-key* "C-<return>" 'browse-url-at-point)
+(bind-key* "C-c C-/" 'comment-line)
+(bind-key* "C-c C-<tab>" 'previous-buffer)
+;; (bind-key* "C-c C-s" 'projectile-ripgrep)
+(bind-key* "C-c C-s" 'consult-ripgrep)
+(bind-key* "C-c s" 'deadgrep)
+(bind-key* "C-c g" 'god-mode-all)
+(bind-key* "C-," 'god-mode-all)
 (bind-key* "C-c C-d" 'mc/mark-next-like-this)
 (bind-key* "C-c C-f" 'projectile-find-file)
 (bind-key* "C-c C-r" 'rg)
