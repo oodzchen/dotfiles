@@ -19,6 +19,17 @@
 
 (setenv "LSP_USE_PLISTS" "true")
 
+;; Native Compilation configuration
+(when (featurep 'native-compile)
+  ;; 静默原生编译的警告和错误提示
+  (setq native-comp-async-report-warnings-errors 'silent)
+  ;; 忽略测试文件和测试目录，防止占用 CPU 卡死
+  (setq native-comp-jit-compilation-deny-list
+        '("/tests?/"
+          "-test\\.el$"
+          "-tests\\.el$"))
+  (setq native-comp-deferred-compilation-deny-list native-comp-jit-compilation-deny-list))
+
 (setq-default js-indent-level 2)
 (setq-default tab-width 4)
 (setq debug-on-error t)
@@ -140,7 +151,9 @@
   :straight t)
 
 (use-package vterm
-  :straight t)
+  :straight t
+  :custom
+  (vterm-always-compile-module t))
 
 ;; (use-package eat
 ;;   :straight t)
@@ -603,6 +616,9 @@
 
 (use-package deadgrep
   :straight t)
+
+(use-package gdscript-mode
+  :vc (:url "git@github.com:godotengine/emacs-gdscript-mode.git"))
 
 (require 'bind-key)
 ;; Global keybindings with highest priority (override mode-specific bindings)
