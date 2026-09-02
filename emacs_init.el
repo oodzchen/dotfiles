@@ -90,6 +90,7 @@
 (setq-default url-queue-timeout 30)
 
 ;; straight.el
+(setq straight-disable-native-compile t)
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name
@@ -115,7 +116,10 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(ansi-color-blue ((t (:background "blue2" :foreground "cyan")))))
+ '(ansi-color-blue ((t (:background "blue2" :foreground "cyan"))))
+ '(vertico-current ((t (:background "#3a3a3a" :foreground "#ffffff" :weight bold))))
+ '(vertico-group-separator ((t (:foreground "#444444"))))
+ '(vertico-group-title ((t (:foreground "#888888" :weight bold)))))
 
 (use-package magit
   :straight t
@@ -649,3 +653,11 @@
 (delete-selection-mode 1)
 
 ;;; .emacs ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-vc-selected-packages
+   '((gdscript-mode :url
+					"git@github.com:godotengine/emacs-gdscript-mode.git"))))
