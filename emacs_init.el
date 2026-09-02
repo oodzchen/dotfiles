@@ -622,7 +622,7 @@
   :straight t)
 
 (use-package gdscript-mode
-  :vc (:url "git@github.com:godotengine/emacs-gdscript-mode.git"))
+  :straight (:type git :host github :repo "godotengine/emacs-gdscript-mode"))
 
 (require 'bind-key)
 ;; Global keybindings with highest priority (override mode-specific bindings)
