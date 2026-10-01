@@ -13,9 +13,6 @@ LOCAL_BIN="${HOME}/.local/bin"
 missing=()
 warn=()
 
-if ! command -v python3 >/dev/null 2>&1; then
-    missing+=("python3  （wrapper 启动时运行 fix-host-peer-deps.py 需要）")
-fi
 if ! command -v node >/dev/null 2>&1; then
     warn+=("node 不在当前 PATH。wrapper 有 nvm fallback（$HOME/.nvm/versions/node/*/bin），")
     warn+=("  若也未安装 nvm + pi，pi 将无法启动。建议：curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash && nvm install --lts")
@@ -42,7 +39,7 @@ if [ ${#missing[@]} -gt 0 ]; then
 fi
 for w in "${warn[@]:-}"; do [ -n "$w" ] && echo "⚠ $w"; done
 
-echo "✓ 依赖检查通过（pi: ${real_pi}, python3: $(command -v python3)）"
+echo "✓ 依赖检查通过（pi: ${real_pi}, node: $(command -v node)）"
 
 # ---------- 软链接 ----------
 # ln_checked <repo文件> <目标路径>
@@ -68,7 +65,7 @@ mkdir -p "$AGENT_DIR/extensions" "$LOCAL_BIN"
 ln_checked "$SCRIPT_DIR/settings.json"          "$AGENT_DIR/settings.json"
 ln_checked "$SCRIPT_DIR/models.json"            "$AGENT_DIR/models.json"
 ln_checked "$SCRIPT_DIR/extensions/error-classifier.ts" "$AGENT_DIR/extensions/error-classifier.ts"
-ln_checked "$SCRIPT_DIR/fix-host-peer-deps.py"  "$AGENT_DIR/fix-host-peer-deps.py"
+ln_checked "$SCRIPT_DIR/fix-host-peer-deps.mjs"  "$AGENT_DIR/fix-host-peer-deps.mjs"
 ln_checked "$SCRIPT_DIR/bin/pi"                 "$LOCAL_BIN/pi"
 
 # ---------- 按 settings.json 安装缺失的扩展包 ----------
@@ -94,7 +91,7 @@ while read -r src; do
             echo "  ✗ $src 安装失败，可稍后手动：pi install $src"
         fi
     fi
-done < <(python3 -c 'import json,sys; [print(p) for p in json.load(open(sys.argv[1]))["packages"] if isinstance(p,str)]' "$SCRIPT_DIR/settings.json")
+done < <(grep -oE '"(npm|git):[^"]+"' "$SCRIPT_DIR/settings.json" | tr -d '"')
 
 # ---------- qmd（pi-memory 的 memory_search 依赖，pi 不会自动装） ----------
 if command -v qmd >/dev/null 2>&1; then

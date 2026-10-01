@@ -9,7 +9,7 @@
 | `settings.json` | `~/.pi/agent/settings.json` — 包列表、默认模型/主题 |
 | `models.json` | `~/.pi/agent/models.json` — 自定义模型定义 |
 | `extensions/error-classifier.ts` | `~/.pi/agent/extensions/` — 自定义扩展 |
-| `fix-host-peer-deps.py` | `~/.pi/agent/` — peer-deps 自动补丁脚本 |
+| `fix-host-peer-deps.mjs` | `~/.pi/agent/` — peer-deps 自动补丁脚本 |
 | `bin/pi` | `~/.local/bin/pi` — 启动 wrapper（补丁 + nvm fallback + 禁用退出摘要） |
 
 ## 安装（新机器）
@@ -34,7 +34,7 @@ ln -sf "$(pwd)/pi/settings.json" ~/.pi/agent/settings.json
 ln -sf "$(pwd)/pi/models.json" ~/.pi/agent/models.json
 mkdir -p ~/.pi/agent/extensions ~/.local/bin
 ln -sf "$(pwd)/pi/extensions/error-classifier.ts" ~/.pi/agent/extensions/error-classifier.ts
-ln -sf "$(pwd)/pi/fix-host-peer-deps.py" ~/.pi/agent/fix-host-peer-deps.py
+ln -sf "$(pwd)/pi/fix-host-peer-deps.mjs" ~/.pi/agent/fix-host-peer-deps.mjs
 ln -sf "$(pwd)/pi/bin/pi" ~/.local/bin/pi
 ```
 
