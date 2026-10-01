@@ -1,0 +1,17 @@
+{
+  "packages": [
+    "git:github.com/pvjagtap/pi-desktop-ui",
+    "npm:pi-web-access",
+    "npm:pi-subagents",
+    "npm:@narumitw/pi-plan-mode",
+    "npm:@juicesharp/rpiv-todo",
+    "npm:@juicesharp/rpiv-ask-user-question",
+    "npm:cc-safety-net",
+    "npm:pi-memory"
+  ],
+  "lastChangelogVersion": "0.99.2",
+  "theme": "dark",
+  "defaultProvider": "openrouter",
+  "defaultModel": "z-ai/glm-5.3-flash",
+  "defaultThinkingLevel": "medium"
+}

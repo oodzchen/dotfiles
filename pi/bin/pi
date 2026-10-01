@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Wrapper around the real pi CLI that keeps installed extension packages
+# patched (host-provided deps moved to peerDependencies) so pi starts
+# without the "must be declared in peerDependencies" warnings, even after
+# `pi install` / `pi update` reinstalls a package.
+set -u
+
+# Disable pi-memory exit summary (LLM call on quit made exiting slow).
+export PI_MEMORY_EXIT_SUMMARY=0
+
+python3 "$HOME/.pi/agent/fix-host-peer-deps.py" >/dev/null 2>&1
+
+# Locate the real pi via npm's own bin symlink instead of hardcoding the
+# dist layout: npm rebuilds <node-bin-dir>/pi from the package's "bin" field
+# on every install/update, so this survives `pi update`, dist layout changes
+# and (with the nvm fallback below) node version bumps.
+NODE_BIN="$(command -v node 2>/dev/null || true)"
+REAL_PI=""
+if [ -n "$NODE_BIN" ]; then
+    cand="${NODE_BIN%/node}/pi"
+    [ -x "$cand" ] && REAL_PI="$cand"
+fi
+# Fallback: newest nvm-installed pi (covers shells without nvm loaded, or a
+# node default switch where pi was installed under a different version).
+if [ -z "$REAL_PI" ]; then
+    nvm_dir="${NVM_DIR:-$HOME/.nvm}"
+    REAL_PI="$(ls -t "$nvm_dir"/versions/node/*/bin/pi 2>/dev/null | head -1)"
+fi
+if [ -z "$REAL_PI" ] || [ ! -x "$REAL_PI" ]; then
+    echo "pi wrapper: cannot locate the real pi CLI (npm global install)" >&2
+    exit 1
+fi
+# The real pi's shebang is `#!/usr/bin/env node`; if node isn't on PATH
+# (bare environment), prepend the newest nvm-installed node's bin.
+if [ -z "$NODE_BIN" ]; then
+    nvm_dir="${NVM_DIR:-$HOME/.nvm}"
+    NODE_BIN="$(ls -t "$nvm_dir"/versions/node/*/bin/node 2>/dev/null | head -1)"
+    [ -x "$NODE_BIN" ] && export PATH="$(dirname "$NODE_BIN"):$PATH"
+fi
+exec "$REAL_PI" "$@"
