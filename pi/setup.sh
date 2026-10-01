@@ -96,5 +96,21 @@ while read -r src; do
     fi
 done < <(python3 -c 'import json,sys; [print(p) for p in json.load(open(sys.argv[1]))["packages"] if isinstance(p,str)]' "$SCRIPT_DIR/settings.json")
 
+# ---------- qmd（pi-memory 的 memory_search 依赖，pi 不会自动装） ----------
+if command -v qmd >/dev/null 2>&1; then
+    echo "  = qmd （已安装）"
+else
+    echo "  + 安装 qmd（pi-memory 的 memory_search 需要）"
+    if npm install -g @tobilu/qmd; then
+        if qmd collection add "$AGENT_DIR/memory" --name pi-memory && qmd embed; then
+            echo "  ✓ qmd 集合已建并生成索引"
+        else
+            echo "  ℹ 集合/索引创建失败也没关系：下次 pi 启动时 pi-memory 会自动补建"
+        fi
+    else
+        echo "  ✗ qmd 安装失败，可手动：npm install -g @tobilu/qmd"
+    fi
+fi
+
 echo
 echo "完成。首次使用：在 pi 里运行 /login 配置 OAuth 凭证，或用 pi auth check 检查 API key。"

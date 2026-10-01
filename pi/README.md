@@ -21,6 +21,8 @@ pi                 # 首次使用：在 pi 里 /login 配置 OAuth，或 pi auth
 
 脚本幂等，可重复执行：已是正确软链会跳过；目标位置已有真文件会先备份为
 `*.setup.bak` 再链接；已安装的扩展包跳过；缺依赖时报错退出、不做任何改动。
+同时检查 qmd（pi-memory 的 memory_search 依赖，缺失时 `npm install -g @tobilu/qmd`
+并建集合/索引）。
 注意：软链生效后，对 `~/.pi/agent/settings.json` 的重定向写入
 （如 `echo x > ~/.pi/agent/settings.json`）会穿透软链覆盖仓库文件。
 用 `pi` 本身的配置命令（如 `pi install`）没有这个问题，它们会写入真实文件。
