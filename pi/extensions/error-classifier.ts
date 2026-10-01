@@ -133,7 +133,7 @@ export default function (pi: ExtensionAPI) {
 		const box = new Box(1, 1, (t) => theme.bg("customMessageBg", t));
 		box.addChild(
 			new Text(
-				`${theme.bold(theme.fg("error", "✖ ERROR DIAGNOSTIC"))} · ${theme.bold(theme.fg("warning", data.category))}`,
+				`${theme.bold(theme.fg("error", "ERROR DIAGNOSTIC"))} · ${theme.bold(theme.fg("warning", data.category))}`,
 				0,
 				0,
 			),
@@ -144,9 +144,6 @@ export default function (pi: ExtensionAPI) {
 				0,
 				0,
 			),
-		);
-		box.addChild(
-			new Text(`${theme.fg("muted", "Category: ")} ${theme.fg("warning", data.category)}`, 0, 0),
 		);
 		box.addChild(new Text(`${theme.fg("muted", "Details:  ")} ${data.rawMessage}`, 0, 0));
 		box.addChild(new Text(`${theme.fg("muted", "Reason:   ")} ${theme.fg("dim", data.description)}`, 0, 0));
