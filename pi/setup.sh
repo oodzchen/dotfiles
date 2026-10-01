@@ -97,4 +97,4 @@ while read -r src; do
 done < <(python3 -c 'import json,sys; [print(p) for p in json.load(open(sys.argv[1]))["packages"] if isinstance(p,str)]' "$SCRIPT_DIR/settings.json")
 
 echo
-echo "完成。若首次使用，运行：pi login   # 配置模型凭证"
+echo "完成。首次使用：在 pi 里运行 /login 配置 OAuth 凭证，或用 pi auth check 检查 API key。"
