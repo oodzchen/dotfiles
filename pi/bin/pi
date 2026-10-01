@@ -43,23 +43,34 @@ find_pi_on_path() {
     return 1
 }
 
-# All known ways a native pi can already exist:
+# Every place a native pi may already live, checked from scratch on every
+# start (idempotent: any existing valid install short-circuits auto-install):
 #   1. next to node (npm's maintained bin symlink, the preferred entry)
 #   2. anywhere on PATH that is not this wrapper (custom npm prefix etc.)
-#   3. newest nvm-installed pi (covers shells without nvm loaded, or a
+#   3. the official installer's managed install entry: ~/.pi/agent/bin/pi
+#      (package root ~/.pi/agent/install; the installer deliberately avoids
+#      ~/.local/bin because our wrapper occupies that name)
+#   4. our own user-prefix fallback from a previous auto-install
+#   5. newest nvm-installed pi (covers shells without nvm loaded, or a
 #      node default switch where pi was installed under a different version)
-REAL_PI=""
-if [ -n "$NODE_BIN" ]; then
-    cand="${NODE_BIN%/node}/pi"
-    [ -x "$cand" ] && REAL_PI="$cand"
-fi
-if [ -z "$REAL_PI" ]; then
-    find_pi_on_path || true
-fi
-if [ -z "$REAL_PI" ]; then
+agent_dir="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}"
+locate_pi() {
+    REAL_PI=""
+    if [ -n "$NODE_BIN" ]; then
+        cand="${NODE_BIN%/node}/pi"
+        [ -x "$cand" ] && REAL_PI="$cand" && return 0
+    fi
+    if find_pi_on_path; then return 0; fi
+    cand="$agent_dir/bin/pi"
+    [ -x "$cand" ] && REAL_PI="$cand" && return 0
+    cand="$HOME/.pi/npm-global/bin/pi"
+    [ -x "$cand" ] && REAL_PI="$cand" && return 0
     cand="$(ls -t "$nvm_dir"/versions/node/*/bin/pi 2>/dev/null | head -1)"
-    [ -x "$cand" ] && REAL_PI="$cand"
-fi
+    [ -x "$cand" ] && REAL_PI="$cand" && return 0
+    return 1
+}
+
+locate_pi || true
 
 # No native pi found anywhere: auto-install it the official way.
 #  - node available  -> README's documented command:
@@ -88,9 +99,14 @@ if [ -z "$REAL_PI" ]; then
         fi
         if [ "$install_rc" -eq 0 ]; then
             # The npm global prefix may not be on PATH and may differ from
-            # node's bin dir — ask npm where it put the binary.
+            # node's bin dir — ask npm where it put the binary, then fall
+            # back to a full from-scratch re-check of every known location.
             cand="$( (npm prefix -g 2>/dev/null || "$NODE_BIN" "${NPM_CLI:-}" prefix -g 2>/dev/null) )/bin/pi"
-            [ -x "$cand" ] && REAL_PI="$cand"
+            if [ -x "$cand" ]; then
+                REAL_PI="$cand"
+            else
+                locate_pi || true
+            fi
         fi
         # Fallback: user-owned prefix (global install may have failed on
         # permissions). Never ~/.local/bin: that is this wrapper's home.
@@ -108,13 +124,10 @@ if [ -z "$REAL_PI" ]; then
     else
         echo "pi wrapper: no node found, running the official pi installer..." >&2
         curl -fsSL https://pi.dev/install.sh | sh >&2
-        # The installer may have brought node along; re-locate it.
+        # The installer may have brought node along (and its managed entry
+        # lands in ~/.pi/agent/bin, which locate_pi covers); re-check all.
         NODE_BIN="$(command -v node 2>/dev/null || true)"
-        if [ -n "$NODE_BIN" ]; then
-            cand="${NODE_BIN%/node}/pi"
-            [ -x "$cand" ] && REAL_PI="$cand"
-        fi
-        [ -z "$REAL_PI" ] && find_pi_on_path || true
+        locate_pi || true
     fi
 fi
 
@@ -131,6 +144,9 @@ fi
 
 if [ -z "$REAL_PI" ] || [ ! -x "$REAL_PI" ]; then
     echo "pi wrapper: cannot locate (and failed to auto-install) the real pi CLI" >&2
+    echo "pi wrapper: checked: node bin dir, PATH (excluding this wrapper)," >&2
+    echo "pi wrapper: $agent_dir/bin/pi (official managed install), ~/.pi/npm-global/bin/pi," >&2
+    echo "pi wrapper: $nvm_dir/versions/node/*/bin/pi" >&2
     exit 1
 fi
 exec "$REAL_PI" "$@"
