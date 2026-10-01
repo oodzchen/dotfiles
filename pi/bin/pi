@@ -8,8 +8,10 @@ set -u
 # Disable pi-memory exit summary (LLM call on quit made exiting slow).
 export PI_MEMORY_EXIT_SUMMARY=0
 
-# Locate node first: needed for both the peer-deps patcher and the real
-# pi's `#!/usr/bin/env node` shebang.
+PI_PACKAGE="@earendil-works/pi-coding-agent"
+
+# Locate node first: needed for both the peer-deps patcher, the real pi's
+# `#!/usr/bin/env node` shebang, and any npm-based auto-install.
 # Prefer npm's own bin dir instead of hardcoding the dist layout: npm
 # rebuilds <node-bin-dir>/pi from the package's "bin" field on every
 # install/update, so this survives `pi update`, dist layout changes and
@@ -21,28 +23,114 @@ if [ -z "$NODE_BIN" ]; then
     [ -x "$NODE_BIN" ] && export PATH="$(dirname "$NODE_BIN"):$PATH"
 fi
 
-# Patch installed extension packages (host-provided deps moved to
-# peerDependencies) so pi starts without the "must be declared in
-# peerDependencies" warnings, even after `pi install` / `pi update`
-# reinstalls a package. Runs with node itself — node is required to run pi
-# anyway, so no python (or any other) dependency. Skipped silently if node
-# or the patcher is missing.
-if [ -n "$NODE_BIN" ] && [ -f "$HOME/.pi/agent/fix-host-peer-deps.mjs" ]; then
-    "$NODE_BIN" "$HOME/.pi/agent/fix-host-peer-deps.mjs" >/dev/null 2>&1
-fi
+# Locate the first `pi` on PATH that is not this wrapper. Covers pure node
+# installs (distro package, /usr/local, volta/fnm/nodenv, ...) where npm's
+# global prefix is not node's own bin dir, so <node-bin-dir>/pi doesn't
+# exist. $0 is the wrapper's full path (bash sets it via PATH lookup), and
+# resolved paths are compared so aliases/symlinks to the wrapper are skipped
+# instead of recursing into ourselves.
+# Sets REAL_PI on success, leaves it empty on failure.
+find_pi_on_path() {
+    self_real="$(readlink -f -- "$0" 2>/dev/null || printf '%s' "$0")"
+    while IFS= read -r cand; do
+        [ -x "$cand" ] || continue
+        cand_real="$(readlink -f -- "$cand" 2>/dev/null || printf '%s' "$cand")"
+        if [ "$cand_real" != "$self_real" ]; then
+            REAL_PI="$cand"
+            return 0
+        fi
+    done < <(type -ap pi)
+    return 1
+}
 
+# All known ways a native pi can already exist:
+#   1. next to node (npm's maintained bin symlink, the preferred entry)
+#   2. anywhere on PATH that is not this wrapper (custom npm prefix etc.)
+#   3. newest nvm-installed pi (covers shells without nvm loaded, or a
+#      node default switch where pi was installed under a different version)
 REAL_PI=""
 if [ -n "$NODE_BIN" ]; then
     cand="${NODE_BIN%/node}/pi"
     [ -x "$cand" ] && REAL_PI="$cand"
 fi
-# Fallback: newest nvm-installed pi (covers shells without nvm loaded, or a
-# node default switch where pi was installed under a different version).
 if [ -z "$REAL_PI" ]; then
-    REAL_PI="$(ls -t "$nvm_dir"/versions/node/*/bin/pi 2>/dev/null | head -1)"
+    find_pi_on_path || true
 fi
+if [ -z "$REAL_PI" ]; then
+    cand="$(ls -t "$nvm_dir"/versions/node/*/bin/pi 2>/dev/null | head -1)"
+    [ -x "$cand" ] && REAL_PI="$cand"
+fi
+
+# No native pi found anywhere: auto-install it the official way.
+#  - node available  -> README's documented command:
+#      npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+#    (needs Node 22.19+, which pi itself requires anyway). If the global
+#    prefix is not writable (e.g. distro node), retry into a user-owned
+#    prefix — deliberately NOT ~/.local/bin, where this wrapper lives and
+#    which npm would overwrite with its own bin symlink.
+#  - node unavailable -> best effort: the official installer
+#      curl -fsSL https://pi.dev/install.sh | sh
+#    (it can set up node interactively; without a tty it prints guidance).
+if [ -z "$REAL_PI" ]; then
+    if [ -n "$NODE_BIN" ]; then
+        NPM_BIN="$(command -v npm 2>/dev/null || true)"
+        if [ -z "$NPM_BIN" ] && [ -f "${NODE_BIN%/node}/../lib/node_modules/npm/bin/npm-cli.js" ]; then
+            NPM_CLI="${NODE_BIN%/node}/../lib/node_modules/npm/bin/npm-cli.js"
+        fi
+        echo "pi wrapper: native pi not found, installing via npm (official method)..." >&2
+        install_rc=1
+        if [ -n "$NPM_BIN" ]; then
+            "$NPM_BIN" install -g --ignore-scripts "$PI_PACKAGE" >&2 && install_rc=0
+        elif [ -n "${NPM_CLI:-}" ]; then
+            "$NODE_BIN" "$NPM_CLI" install -g --ignore-scripts "$PI_PACKAGE" >&2 && install_rc=0
+        else
+            echo "pi wrapper: npm not found next to node; cannot auto-install" >&2
+        fi
+        if [ "$install_rc" -eq 0 ]; then
+            # The npm global prefix may not be on PATH and may differ from
+            # node's bin dir — ask npm where it put the binary.
+            cand="$( (npm prefix -g 2>/dev/null || "$NODE_BIN" "${NPM_CLI:-}" prefix -g 2>/dev/null) )/bin/pi"
+            [ -x "$cand" ] && REAL_PI="$cand"
+        fi
+        # Fallback: user-owned prefix (global install may have failed on
+        # permissions). Never ~/.local/bin: that is this wrapper's home.
+        if [ -z "$REAL_PI" ]; then
+            PI_USER_PREFIX="$HOME/.pi/npm-global"
+            echo "pi wrapper: retrying install into $PI_USER_PREFIX ..." >&2
+            if [ -n "${NPM_BIN:-}" ]; then
+                "$NPM_BIN" install -g --prefix "$PI_USER_PREFIX" --ignore-scripts "$PI_PACKAGE" >&2 \
+                  && REAL_PI="$PI_USER_PREFIX/bin/pi"
+            elif [ -n "${NPM_CLI:-}" ]; then
+                "$NODE_BIN" "$NPM_CLI" install -g --prefix "$PI_USER_PREFIX" --ignore-scripts "$PI_PACKAGE" >&2 \
+                  && REAL_PI="$PI_USER_PREFIX/bin/pi"
+            fi
+        fi
+    else
+        echo "pi wrapper: no node found, running the official pi installer..." >&2
+        curl -fsSL https://pi.dev/install.sh | sh >&2
+        # The installer may have brought node along; re-locate it.
+        NODE_BIN="$(command -v node 2>/dev/null || true)"
+        if [ -n "$NODE_BIN" ]; then
+            cand="${NODE_BIN%/node}/pi"
+            [ -x "$cand" ] && REAL_PI="$cand"
+        fi
+        [ -z "$REAL_PI" ] && find_pi_on_path || true
+    fi
+fi
+
+# Patch installed extension packages (host-provided deps moved to
+# peerDependencies) so pi starts without the "must be declared in
+# peerDependencies" warnings, even after `pi install` / `pi update`
+# reinstalls a package. Runs with node itself — node is required to run pi
+# anyway, so no python (or any other) dependency. Runs after any
+# auto-install so freshly installed packages are covered on first launch.
+# Skipped silently if node or the patcher is missing.
+if [ -n "$NODE_BIN" ] && [ -f "$HOME/.pi/agent/fix-host-peer-deps.mjs" ]; then
+    "$NODE_BIN" "$HOME/.pi/agent/fix-host-peer-deps.mjs" >/dev/null 2>&1
+fi
+
 if [ -z "$REAL_PI" ] || [ ! -x "$REAL_PI" ]; then
-    echo "pi wrapper: cannot locate the real pi CLI (npm global install)" >&2
+    echo "pi wrapper: cannot locate (and failed to auto-install) the real pi CLI" >&2
     exit 1
 fi
 exec "$REAL_PI" "$@"
