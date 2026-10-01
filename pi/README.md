@@ -15,13 +15,11 @@
 ## 安装（新机器）
 
 ```bash
-./pi/setup.sh      # 检测依赖（python3/node/npm/原生 pi），自动建立软链
-pi install         # 按 settings.json 的 packages 列表重装扩展包
-pi login           # 重新配置模型凭证（不在本仓库）
+./pi/setup.sh      # 检测依赖 → 建软链 → 安装缺失的扩展包 → 提示 pi login
 ```
 
 脚本幂等，可重复执行：已是正确软链会跳过；目标位置已有真文件会先备份为
-`*.setup.bak` 再链接；缺依赖时报错退出、不做任何改动。
+`*.setup.bak` 再链接；已安装的扩展包跳过；缺依赖时报错退出、不做任何改动。
 注意：软链生效后，对 `~/.pi/agent/settings.json` 的重定向写入
 （如 `echo x > ~/.pi/agent/settings.json`）会穿透软链覆盖仓库文件。
 用 `pi` 本身的配置命令（如 `pi install`）没有这个问题，它们会写入真实文件。
@@ -37,5 +35,5 @@ ln -sf "$(pwd)/pi/fix-host-peer-deps.py" ~/.pi/agent/fix-host-peer-deps.py
 ln -sf "$(pwd)/pi/bin/pi" ~/.local/bin/pi
 ```
 
-`settings.json` 里的 packages（pi-subagents、pi-memory 等）由 `pi install` 自动重装，
+settings.json 里的 packages 声明 + `./pi/setup.sh` 会自动安装缺失的包，
 无需备份 `npm/`、`git/` 下的包本体。

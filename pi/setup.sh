@@ -71,7 +71,30 @@ ln_checked "$SCRIPT_DIR/extensions/error-classifier.ts" "$AGENT_DIR/extensions/e
 ln_checked "$SCRIPT_DIR/fix-host-peer-deps.py"  "$AGENT_DIR/fix-host-peer-deps.py"
 ln_checked "$SCRIPT_DIR/bin/pi"                 "$LOCAL_BIN/pi"
 
+# ---------- 按 settings.json 安装缺失的扩展包 ----------
+# pi install 不读 settings.json，需逐个指定来源；已安装的跳过，重复执行安全。
+echo "检查扩展包："
+while read -r src; do
+    [ -z "$src" ] && continue
+    case "$src" in
+        npm:*)
+            dst="$AGENT_DIR/npm/node_modules/${src#npm:}" ;;
+        git:*)
+            dst="$AGENT_DIR/git/${src#git:}" ;;
+        *)
+            dst="" ;;
+    esac
+    if [ -n "$dst" ] && [ -e "$dst" ]; then
+        echo "  = $src （已安装）"
+    else
+        echo "  + 安装 $src"
+        if pi install "$src" --approve; then
+            echo "  ✓ $src"
+        else
+            echo "  ✗ $src 安装失败，可稍后手动：pi install $src"
+        fi
+    fi
+done < <(python3 -c 'import json,sys; [print(p) for p in json.load(open(sys.argv[1]))["packages"] if isinstance(p,str)]' "$SCRIPT_DIR/settings.json")
+
 echo
-echo "完成。接下来："
-echo "  1. pi install   # 按 settings.json 的 packages 列表安装扩展包"
-echo "  2. pi login     # 配置模型凭证（auth.json 不在本仓库）"
+echo "完成。若首次使用，运行：pi login   # 配置模型凭证"
