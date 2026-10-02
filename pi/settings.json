@@ -1,6 +1,5 @@
 {
   "packages": [
-    "git:github.com/pvjagtap/pi-desktop-ui",
     "npm:pi-web-access",
     "npm:pi-subagents",
     "npm:@narumitw/pi-plan-mode",
@@ -9,7 +8,7 @@
     "npm:cc-safety-net",
     "npm:pi-memory"
   ],
-  "lastChangelogVersion": "0.99.2",
+  "lastChangelogVersion": "1.0.0",
   "theme": "dark",
   "defaultProvider": "openrouter",
   "defaultModel": "z-ai/glm-5.3-flash",
