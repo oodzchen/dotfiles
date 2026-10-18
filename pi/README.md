@@ -8,7 +8,10 @@
 |---|---|
 | `settings.json` | `~/.pi/agent/settings.json` — 包列表、默认模型/主题 |
 | `models.json` | `~/.pi/agent/models.json` — 自定义模型定义 |
+| `web-search.json` | `~/.pi/agent/web-search.json` — web 工具 SSRF 白名单（fake-IP） |
 | `extensions/error-classifier.ts` | `~/.pi/agent/extensions/` — 自定义扩展 |
+| `extensions/prefer-rg.ts` | `~/.pi/agent/extensions/` — 优先 ripgrep（提示词 + 拦截递归 grep） |
+| `extensions/hide-commands.ts` | `~/.pi/agent/extensions/` — 从 `/` 补全菜单隐藏内置命令（默认隐藏 `/clone`，配置 `~/.pi/agent/hide-commands.json`） |
 | `fix-host-peer-deps.mjs` | `~/.pi/agent/` — peer-deps 自动补丁脚本 |
 | `bin/pi` | `~/.local/bin/pi` — 启动 wrapper（补丁 + nvm fallback + 禁用退出摘要） |
 
@@ -32,8 +35,11 @@ pi                 # 首次使用：在 pi 里 /login 配置 OAuth，或 pi auth
 ```bash
 ln -sf "$(pwd)/pi/settings.json" ~/.pi/agent/settings.json
 ln -sf "$(pwd)/pi/models.json" ~/.pi/agent/models.json
+ln -sf "$(pwd)/pi/web-search.json" ~/.pi/agent/web-search.json
 mkdir -p ~/.pi/agent/extensions ~/.local/bin
 ln -sf "$(pwd)/pi/extensions/error-classifier.ts" ~/.pi/agent/extensions/error-classifier.ts
+ln -sf "$(pwd)/pi/extensions/prefer-rg.ts" ~/.pi/agent/extensions/prefer-rg.ts
+ln -sf "$(pwd)/pi/extensions/hide-commands.ts" ~/.pi/agent/extensions/hide-commands.ts
 ln -sf "$(pwd)/pi/fix-host-peer-deps.mjs" ~/.pi/agent/fix-host-peer-deps.mjs
 ln -sf "$(pwd)/pi/bin/pi" ~/.local/bin/pi
 ```

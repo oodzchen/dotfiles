@@ -3,11 +3,11 @@
 		"openrouter": {
 			"models": [
 				{
-					"id": "z-ai/glm-5.3-flash",
-					"name": "Z.ai: GLM 5.3 Flash",
+					"id": "deepseek/deepseek-v4.1-flash-1017",
+					"name": "DeepSeek: DeepSeek V4.1 Flash 1017",
 					"reasoning": true,
 					"thinkingLevelMap": {
-						"off": null,
+						"off": "none",
 						"minimal": null,
 						"low": "low",
 						"medium": null,
@@ -17,13 +17,25 @@
 					},
 					"input": ["text", "image"],
 					"cost": {
-						"input": 0.075,
-						"output": 0.25,
-						"cacheRead": 0.015,
+						"input": 0.3,
+						"output": 1.2,
+						"cacheRead": 0.006,
 						"cacheWrite": 0
 					},
 					"contextWindow": 1048576,
-					"maxTokens": 131072
+					"maxTokens": 262144,
+					"compat": {
+						"supportsDeveloperRole": false,
+						"thinkingFormat": "openrouter",
+						"maxTokensField": "max_tokens",
+						"supportsStrictMode": true,
+						"sendSessionAffinityHeaders": true,
+						"requiresReasoningContentOnAssistantMessages": true,
+						"openRouterRouting": {
+							"order": ["fireworks", "parasail", "baseten"],
+							"allow_fallbacks": true
+						}
+					}
 				}
 			]
 		}
