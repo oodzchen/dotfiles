@@ -1,0 +1,8 @@
+# 凭据与密钥（切勿提交到公共仓库！）
+key
+rclone/rclone.conf
+
+# 运行时缓存与临时数据
+cache/
+restored/
+*.log

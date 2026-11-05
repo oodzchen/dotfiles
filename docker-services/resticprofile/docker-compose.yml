@@ -1,0 +1,23 @@
+services:
+  resticprofile:
+    image: creativeprojects/resticprofile:latest
+    container_name: resticprofile
+    restart: unless-stopped
+    # 采用 host 网络模式：确保能够通过本地代理（如 127.0.0.1:1089）连接 Google API
+    network_mode: host
+    environment:
+      - TZ=Asia/Shanghai
+      - RCLONE_CONFIG=/etc/resticprofile/rclone/rclone.conf
+    volumes:
+      # 配置文件、密钥与 rclone 认证凭证
+      - ./profiles.yaml:/etc/resticprofile/profiles.yaml:ro
+      - ./key:/etc/resticprofile/key:ro
+      - ./rclone:/etc/resticprofile/rclone
+      - ./cache:/root/.cache/restic
+      - /etc/localtime:/etc/localtime:ro
+      # 将当前用户的家目录动态挂载为容器内的 /data（只读 ro）
+      # 无论换任何电脑、任何用户名，均能通用且自适应！
+      - ${HOME}:/data:ro
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - "resticprofile --config /etc/resticprofile/profiles.yaml schedule --all && crond -f -l 2"
