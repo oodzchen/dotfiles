@@ -8,12 +8,14 @@
     "npm:cc-safety-net",
     "npm:pi-memory",
     "npm:pi-mcp-adapter",
-    "npm:@nijaru/pi-peak-hours"
+    "npm:@nijaru/pi-peak-hours",
+    "npm:pi-multi-pass",
+    "npm:pi-antigravity"
   ],
-  "lastChangelogVersion": "1.3.0",
+  "lastChangelogVersion": "1.4.0",
   "theme": "dark",
-  "defaultProvider": "openrouter",
-  "defaultModel": "deepseek/deepseek-v4.1-flash-1017",
+  "defaultProvider": "antigravity",
+  "defaultModel": "gemini-3.8-flash",
   "defaultThinkingLevel": "medium",
   "defaultTools": [
     "+grep",
@@ -22,5 +24,9 @@
   ],
   "extensions": [
     "-builtin:mcp"
-  ]
+  ],
+  "modelThinkingLevels": {
+    "antigravity/gemini-3.8-flash": "high",
+    "antigravity/gemini-4-argon": "medium"
+  }
 }
