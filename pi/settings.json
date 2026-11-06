@@ -33,6 +33,7 @@
     "{\"source\":\"npm:pi-web-access\",\"scope\":\"user\"}": "0.47.0",
     "{\"source\":\"npm:pi-subagents\",\"scope\":\"user\"}": "0.86.0",
     "{\"source\":\"npm:@narumitw/pi-plan-mode\",\"scope\":\"user\"}": "0.59.6",
-    "{\"source\":\"npm:pi-memory\",\"scope\":\"user\"}": "0.4.2"
+    "{\"source\":\"npm:pi-memory\",\"scope\":\"user\"}": "0.4.2",
+    "{\"source\":\"npm:pi-mcp-adapter\",\"scope\":\"user\"}": "7.0.1"
   }
 }

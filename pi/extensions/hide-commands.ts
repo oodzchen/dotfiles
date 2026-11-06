@@ -29,7 +29,7 @@ type HideCommandsState = {
 
 const DEFAULT_STATE: HideCommandsState = {
 	enabled: true,
-	hidden: ["clone"],
+	hidden: ["clone", "new"],
 };
 
 const USAGE = "用法: /hide-commands [status|on|off|add <name>|remove <name>|reset]";

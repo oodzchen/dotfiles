@@ -142,6 +142,7 @@ ln_checked "$SCRIPT_DIR/extensions/error-classifier.ts" "$AGENT_DIR/extensions/e
 ln_checked "$SCRIPT_DIR/extensions/clear-alias.ts" "$AGENT_DIR/extensions/clear-alias.ts"
 ln_checked "$SCRIPT_DIR/extensions/prefer-rg.ts"     "$AGENT_DIR/extensions/prefer-rg.ts"
 ln_checked "$SCRIPT_DIR/extensions/hide-commands.ts" "$AGENT_DIR/extensions/hide-commands.ts"
+ln_checked "$SCRIPT_DIR/extensions/remember-last-model.ts" "$AGENT_DIR/extensions/remember-last-model.ts"
 ln_checked "$SCRIPT_DIR/fix-host-peer-deps.mjs"  "$AGENT_DIR/fix-host-peer-deps.mjs"
 ln_checked "$SCRIPT_DIR/bin/pi"                 "$LOCAL_BIN/pi"
 
@@ -168,7 +169,7 @@ while read -r src; do
             echo "  ✗ $src 安装失败，可稍后手动：pi install $src"
         fi
     fi
-done < <(grep -oE '"(npm|git):[^"]+"' "$SCRIPT_DIR/settings.json" | tr -d '"')
+done < <("$NODE_BIN" -e 'const pkg = JSON.parse(require("fs").readFileSync(process.argv[1])).packages || []; console.log(pkg.join("\n"))' "$SCRIPT_DIR/settings.json")
 
 # ---------- qmd（pi-memory 的 memory_search 依赖，pi 不会自动装） ----------
 if command -v qmd >/dev/null 2>&1; then
