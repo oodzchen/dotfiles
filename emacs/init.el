@@ -44,7 +44,9 @@
 		mode-line-remote
 		mode-line-frame-identification
 		;; mode-line-buffer-identification
-		(:eval (abbreviate-file-name (buffer-file-name)))
+		(:eval (if (buffer-file-name)
+                           (abbreviate-file-name (buffer-file-name))
+                         "%b"))
 		"  "
 		mode-line-position
 
@@ -111,6 +113,17 @@
 (straight-use-package 'use-package)
 (setq straight-use-package-by-default t)
 
+;; 同步终端 Shell 的 PATH 与环境变量（解决 GUI/桌面启动时找不到 node、go 等问题）
+(use-package exec-path-from-shell
+  :straight t
+  :if (or (daemonp) (memq window-system '(x pgtk wayland ns)))
+  :init
+  (setq exec-path-from-shell-check-startup-files nil)
+  :config
+  (dolist (var '("GOPATH" "GOROOT"))
+    (add-to-list 'exec-path-from-shell-variables var))
+  (exec-path-from-shell-initialize))
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -154,16 +167,23 @@
 (use-package restart-emacs
   :straight t)
 
-(use-package vterm
-  :straight t
-  :custom
-  (vterm-always-compile-module t))
-
 ;; (use-package eat
 ;;   :straight t)
 
 (use-package zeno-theme
   :straight t
+  :init
+  ;; 修复 Emacs 30 中 zeno-theme 将 diff-file-header 背景设为 nil 导致的警告
+  (defun my/fix-zeno-theme-nil-bg (orig-fn theme &rest specs)
+    (let ((specs* (if (eq theme 'zeno)
+                      (mapcar (lambda (entry)
+                                (if (eq (car entry) 'diff-file-header)
+                                    '(diff-file-header ((t (:background unspecified))))
+                                  entry))
+                              specs)
+                    specs)))
+      (apply orig-fn theme specs*)))
+  (advice-add 'custom-theme-set-faces :around #'my/fix-zeno-theme-nil-bg)
   :config
   (load-theme 'zeno t))
 
@@ -179,6 +199,13 @@
 ;; (use-package company-quickhelp
 ;;   :straight t
 ;;   :hook (company-mode . company-quickhelp-mode))
+
+;; 优先使用当前项目本地 node_modules/.bin 中的工具（支持 LSP、ESLint、Prettier 等）
+(use-package add-node-modules-path
+  :straight t
+  :hook ((typescript-mode . add-node-modules-path)
+         (js-mode         . add-node-modules-path)
+         (web-mode        . add-node-modules-path)))
 
 ;; TypeScript 支持
 (use-package typescript-mode
@@ -243,38 +270,24 @@
   (add-hook 'typescript-mode-hook 'flycheck-mode)
   (add-hook 'web-mode-hook 'flycheck-mode)
   
-  ;; 强制在 web-mode 和 typescript-mode 中使用 ESLint
+  ;; 智能选择 ESLint：仅在项目包含 ESLint 配置且 eslint 可执行时强制启用，否则回退到 LSP 检查
   (defun my-force-eslint-in-js-ts ()
-    "Force ESLint selection and prevent LSP from overriding it."
+    "Select ESLint when configured; otherwise let LSP or other checkers handle it."
     (when (or (eq major-mode 'typescript-mode)
               (and (eq major-mode 'web-mode)
-                   (member (file-name-extension buffer-file-name) '("tsx" "jsx"))))
+                   (member (file-name-extension (or buffer-file-name "")) '("tsx" "jsx"))))
       (flycheck-mode 1)
-      ;; 立即设置
-      (setq-local flycheck-checker 'javascript-eslint)
-      ;; 延迟设置以防被覆盖
-      (run-with-timer 0.2 nil
-                      (lambda (buf)
-                        (when (buffer-live-p buf)
-                          (with-current-buffer buf
-                            (setq-local flycheck-checker 'javascript-eslint)
-                            (when flycheck-mode (flycheck-buffer)))))
-                      (current-buffer))
-      ;; 再次延迟设置以确保生效
-      (run-with-timer 1.0 nil
-                      (lambda (buf)
-                        (when (buffer-live-p buf)
-                          (with-current-buffer buf
-                            (unless (eq flycheck-checker 'javascript-eslint)
-                              (setq-local flycheck-checker 'javascript-eslint)
-                              (when flycheck-mode (flycheck-buffer))))))
-                      (current-buffer))))
+      (when (and (executable-find flycheck-javascript-eslint-executable)
+                 (my-flycheck-eslint-config-exists-p))
+        (setq-local flycheck-checker 'javascript-eslint))))
   
   (add-hook 'typescript-mode-hook #'my-force-eslint-in-js-ts)
   (add-hook 'web-mode-hook #'my-force-eslint-in-js-ts)
   
-  ;; 扩展 javascript-eslint 检查器支持的模式
+  ;; 扩展检查器支持的模式
   (with-eval-after-load 'flycheck
+    ;; 支持 scratch 缓冲区，避免无语法检查器警告
+    (flycheck-add-mode 'emacs-lisp 'lisp-interaction-mode)
     ;; 为 javascript-eslint 检查器添加 web-mode 支持
     (flycheck-add-mode 'javascript-eslint 'web-mode))
   
@@ -289,6 +302,8 @@
   ;; (setq lsp-keymap-prefix "C-c l")
   (setq lsp-auto-guess-root t)
   (setq lsp-use-plists t)
+  ;; 禁用旧版 Node 桥接客户端，全面使用 TypeScript 7 原生 tsgo 引擎
+  (setq lsp-disabled-clients '(ts-ls jsts-ls))
   
   :hook ((go-mode . lsp-deferred)
          (python-ts-mode . lsp-deferred)
@@ -313,11 +328,28 @@
         lsp-ui-doc-include-signature t
 	    lsp-ui-doc-delay 1
 	    lsp-ui-doc-show-with-cursor t
-		;; lsp-clients-typescript-tls-path "typescript-language-server"
 	    lsp-completion-provider :none)
   
-  ;; TypeScript LSP configuration
-  (setq lsp-clients-typescript-tls-path "typescript-language-server")
+  ;; TypeScript 7 原生 LSP 配置
+  (setq lsp-clients-tsgo-path "tsgo")
+
+  ;; 兼容 tsgo 强类型检查：
+  ;; 1) 过滤掉客户端能力中未初始化的 inlineCompletion null 值
+  (defun my/lsp-fix-client-capabilities (orig-fn &rest args)
+    (let ((caps (apply orig-fn args)))
+      (when-let* ((td (assoc 'textDocument caps)))
+        (setcdr td (delq (assoc 'inlineCompletion (cdr td)) (cdr td))))
+      caps))
+  (advice-add 'lsp--client-capabilities :around #'my/lsp-fix-client-capabilities)
+
+  ;; 2) shutdown 请求在 LSP 规范中无参数，移除发送时的 :params null
+  (defun my/lsp-clean-body-for-tsgo (orig-fn body &rest args)
+    (when (and (equal (plist-get body :method) "shutdown")
+               (null (plist-get body :params)))
+      (setq body (copy-sequence body))
+      (cl-remf body :params))
+    (apply orig-fn body args))
+  (advice-add 'lsp--send-no-wait :around #'my/lsp-clean-body-for-tsgo)
   
   (use-package lsp-ui
     :after lsp-mode
@@ -325,7 +357,7 @@
     (setq lsp-ui-doc-enable t)           ; 文档模块
     (setq lsp-ui-sideline-enable t)      ; 侧边栏模块
     (setq lsp-ui-peek-enable t)          ; 预览模块
-	(setq lsp-ui-flycheck-enable nil)
+	(setq lsp-ui-flycheck-enable t)
     (setq lsp-ui-imenu-enable t))     ; 错误检查模块
 
   ;; (use-package lsp-completion
@@ -363,6 +395,45 @@
                   :around
                   #'lsp-booster--advice-json-parse)
       (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command))
+
+;; ---------------------------------------------------------------------
+;; LSP Server 自动检测与后台异步安装
+;; ---------------------------------------------------------------------
+(defvar my/lsp-server-install-recipes
+  '(("tsgo"                       . (:check "npm" :cmd "npm install -g @typescript/native-preview"))
+    ("tailwindcss-language-server" . (:check "npm" :cmd "npm install -g @tailwindcss/language-server"))
+    ("yaml-language-server"       . (:check "npm" :cmd "npm install -g yaml-language-server"))
+    ("vscode-json-language-server" . (:check "npm" :cmd "npm install -g vscode-langservers-extracted"))
+    ("pyright"                    . (:check "npm" :cmd "npm install -g pyright"))
+    ("gopls"                      . (:check "go"  :cmd "go install golang.org/x/tools/gopls@latest")))
+  "待检查并自动安装的 LSP Server 列表及其安装指令。")
+
+(defun my/install-missing-lsp-servers ()
+  "检查并异步安装所有缺失的 LSP Server。"
+  (interactive)
+  (dolist (item my/lsp-server-install-recipes)
+    (let* ((bin (car item))
+           (spec (cdr item))
+           (prereq (plist-get spec :check))
+           (cmd (plist-get spec :cmd)))
+      (unless (executable-find bin)
+        (if (and prereq (not (executable-find prereq)))
+            (message "[LSP Auto-Install] 跳过 %s: 未找到 %s 环境" bin prereq)
+          (message "[LSP Auto-Install] 正在后台安装 %s ..." bin)
+          (let ((proc (start-process-shell-command
+                       (concat "lsp-install-" bin)
+                       (format "*lsp-install-%s*" bin)
+                       cmd)))
+            (set-process-sentinel
+             proc
+             (lambda (p event)
+               (let ((name (process-name p)))
+                 (if (string= event "finished\n")
+                     (message "[LSP Auto-Install] %s 安装完成！" name)
+                   (message "[LSP Auto-Install] %s 安装退出: %s（详见对应 *%s* 缓冲区）"
+                            name (string-trim event) name)))))))))))
+
+(add-hook 'after-init-hook #'my/install-missing-lsp-servers)
 
 (defun my-go-mode-hook ()
   ;; Use goimports instead of go-fmt
@@ -574,6 +645,7 @@
 
 (use-package yasnippet
   :config
+  (setq yas-verbosity 1)
   (yas-global-mode 1))
 
 (use-package expand-region
@@ -639,6 +711,7 @@
 (bind-key* "C-c C-d" 'mc/mark-next-like-this)
 (bind-key* "C-c C-f" 'projectile-find-file)
 (bind-key* "C-c C-r" 'rg)
+(bind-key* "C-x C-g" 'keyboard-quit)
 
 (provide '.emacs)
 
